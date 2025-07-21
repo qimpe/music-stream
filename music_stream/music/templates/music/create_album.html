@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<h2>Create New Album</h2>
+<form method="post" enctype="multipart/form-data" id="album-form">
+    {% csrf_token %}
+
+    <!-- Album Form -->
+    {{ album_form.as_p }}
+
+    <!-- Tracks -->
+    <h3>Tracks</h3>
+    <div id="track-forms-container">
+        {{ track_formset.management_form }}
+        {% for form in track_formset %}
+        <div id="empty-track-form" style="display:none">
+            <div class="track-form">
+                {{ track_formset.empty_form.as_p }}
+                <button type="button" class="remove-track">Удалить</button>
+            </div>
+        </div>
+    </div>
+    <button type="submit">Create Album</button>
+</form>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const addTrackButton = document.getElementById('add-track');
+        const trackFormsContainer = document.getElementById('track-forms-container');
+        const emptyTrackForm = document.querySelector('#empty-track-form .track-form');
+
+        // Функция для обновления префиксов в клонированной форме
+        function updatePrefix(element, newIndex) {
+            const attrs = ['id', 'name', 'for'];
+            attrs.forEach(attr => {
+                if (element.hasAttribute(attr)) {
+                    let value = element.getAttribute(attr);
+                    value = value.replace(/__prefix__/g, newIndex);
+                    element.setAttribute(attr, value);
+                }
+            });
+            Array.from(element.children).forEach(child => updatePrefix(child, newIndex));
+        }
+
+        // Добавление новой формы трека
+        addTrackButton.addEventListener('click', function () {
+            const totalForms = document.querySelector('#id_form-TOTAL_FORMS');
+            const currentForms = parseInt(totalForms.value);
+            const newIndex = currentForms;
+
+            const clonedForm = emptyTrackForm.cloneNode(true);
+            updatePrefix(clonedForm, newIndex);
+
+            trackFormsContainer.appendChild(clonedForm);
+            totalForms.value = currentForms + 1;
+        });
+
+        // Удаление формы трека
+        trackFormsContainer.addEventListener('click', function (event) {
+            if (event.target.classList.contains('remove-track')) {
+                const trackForm = event.target.closest('.track-form');
+                const deleteInput = trackForm.querySelector('[name$="-DELETE"]');
+                if (deleteInput) {
+                    deleteInput.value = '1';
+                    trackForm.style.display = 'none'; // Скрыть форму
+                }
+            }
+        });
+    });
+</script>
+{% endblock content %}

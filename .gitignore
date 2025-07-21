@@ -1,0 +1,16 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+/music_stream/.mypy_cache
+/.vscode
+/.pytest_cache
+/music_stream/.pytest_cache
+/music_stream/.coverage
+/music_stream/.coveragerc
