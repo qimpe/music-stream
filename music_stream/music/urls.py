@@ -24,6 +24,6 @@ app_name = "music"
 urlpatterns = [
     path("", views.IndexView.as_view(), name="index"),
     path("create-artist/", views.ArtistCreateView.as_view(), name="create_artist"),
-    path("artist/<slug:slug>", views.ArtistDetailView.as_view(), name="artist_detail"),
-    path("create-album/", views.AlbumCreateView.as_view(), name="album_create"),
+    path("artist/<int:artist_id>", views.ArtistDetailView.as_view(), name="artist_detail"),
+    path("create-album/", views.AlbumCreateView.as_view(), name="create_album"),
 ]

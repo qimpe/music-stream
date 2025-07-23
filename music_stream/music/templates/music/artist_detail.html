@@ -1,6 +1,25 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block content %}
+<img src="{{artist.image.url}}" alt="{{artist}}_image">
+<h4>Исполнитель</h4>
 <h1>{{artist}}</h1>
-<a href="">Создать альбом</a>
+{% if artist.bio %}
+<h3>{{artist.bio }}</h3>
+{% endif %}
+<div>
+    {% if artist_albums %}
+    {% for artist_album in artist_albums %}
+    <ul>
+        <li>
+            <a href="#"><img src="{{artist_album.album.cover.url}}" alt="{{artist_album.album}}_cover"></a>
+        </li>
+    </ul>
+    {% endfor %}
+    {% else %}
+    <h3>У тебя пока нет ни одного релиза. Пора исправляться!</h3>
+    {% endif %}
+</div>
+<a href="{% url 'music:create_album' %}">Создать альбом</a>
+<a href="{% url 'music:create_album' %}">Выпустить Сингл</a>
 {% endblock content %}

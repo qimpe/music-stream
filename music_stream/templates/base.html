@@ -18,7 +18,7 @@
         <ul>
             <li><a href="{% url 'music:index' %}">Главная</a></li>
             <li><a href="">Моя Музыка</a></li>
-            <li><a href="">Профиль</a></li>
+            <li><a href="{% url 'users:profile' request.user.id %}">Профиль</a></li>
         </ul>
     </nav>
     <body>

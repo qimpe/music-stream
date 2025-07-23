@@ -14,9 +14,9 @@ class Status(models.TextChoices):
 
 
 class Music(models.Model):
-    title = models.CharField(null=False, blank=False, max_length=128, unique=True, verbose_name="Название")
-    slug = models.SlugField(null=False, max_length=128, unique=True)
-    is_explicit = models.BooleanField(null=False, default=False, verbose_name="Возрастное ограничение 18+")
+    title = models.CharField(null=False, blank=False, max_length=128, verbose_name="Название")
+    slug = models.SlugField(null=False, max_length=128, unique=False)
+    is_explicit = models.BooleanField(blank=True, null=False, default=False, verbose_name="Возрастное ограничение 18+")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Создано")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Обновлено")
 
@@ -78,7 +78,6 @@ class Genre(models.Model):
 
 
 class Album(Music):
-    artist = models.ForeignKey(Artist, on_delete=models.CASCADE)
     cover = models.ImageField(upload_to="music_covers/", verbose_name="Обложка")
     release_date = models.DateTimeField(null=True, verbose_name="Дата релиза")
     status = models.CharField(
@@ -128,14 +127,6 @@ class Playlist(Music):
 
 
 # Связные таблица
-class TrackMetadata(models.Model):
-    track = models.OneToOneField(Track, on_delete=models.CASCADE)
-    duration = models.PositiveSmallIntegerField()
-    bitrate = models.PositiveSmallIntegerField()
-    file_size = models.PositiveIntegerField()
-
-    def __str__(self) -> str:
-        return f"Metadata of {self.track}"
 
 
 class UserArtist(models.Model):
@@ -158,6 +149,16 @@ class AlbumArtist(models.Model):
 
     def __str__(self) -> str:
         return f"Artist {self.artist} manage album {self.album}"
+
+
+class TrackMetadata(models.Model):
+    track = models.OneToOneField(Track, on_delete=models.CASCADE)
+    duration = models.PositiveSmallIntegerField()
+    bitrate = models.PositiveSmallIntegerField()
+    file_size = models.PositiveIntegerField()
+
+    def __str__(self) -> str:
+        return f"Metadata of {self.track}"
 
 
 class TrackInPlaylist(models.Model):

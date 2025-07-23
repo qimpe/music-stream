@@ -11,61 +11,39 @@
 
     <!-- Tracks -->
     <h3>Tracks</h3>
+    <div class="form-group">
+        {{ form.position.label_tag }}
+        {{ form.position }}
+        {% if form.position.errors %}
+        <div class="text-danger">
+            {% for error in form.position.errors %}
+            <small>{{ error }}</small>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
     <div id="track-forms-container">
         {{ track_formset.management_form }}
         {% for form in track_formset %}
-        <div id="empty-track-form" style="display:none">
-            <div class="track-form">
-                {{ track_formset.empty_form.as_p }}
-                <button type="button" class="remove-track">Удалить</button>
-            </div>
+        <div class="track-form">
+            {{ form.as_p }}
+            <button type="button" class="remove-track">Удалить</button>
         </div>
+        {% endfor %}
     </div>
+    <button type="button" id="add-track">+ Добавить трек</button>
+
     <button type="submit">Create Album</button>
 </form>
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const addTrackButton = document.getElementById('add-track');
-        const trackFormsContainer = document.getElementById('track-forms-container');
-        const emptyTrackForm = document.querySelector('#empty-track-form .track-form');
 
-        // Функция для обновления префиксов в клонированной форме
-        function updatePrefix(element, newIndex) {
-            const attrs = ['id', 'name', 'for'];
-            attrs.forEach(attr => {
-                if (element.hasAttribute(attr)) {
-                    let value = element.getAttribute(attr);
-                    value = value.replace(/__prefix__/g, newIndex);
-                    element.setAttribute(attr, value);
-                }
-            });
-            Array.from(element.children).forEach(child => updatePrefix(child, newIndex));
-        }
+<!-- Скрытый шаблон для новых форм -->
+<div id="empty-form" style="display:none;">
+    <div class="track-form">
+        {{ track_formset.empty_form.as_p }}
+        <button type="button" class="remove-track">Удалить</button>
+    </div>
+</div>
 
-        // Добавление новой формы трека
-        addTrackButton.addEventListener('click', function () {
-            const totalForms = document.querySelector('#id_form-TOTAL_FORMS');
-            const currentForms = parseInt(totalForms.value);
-            const newIndex = currentForms;
+<script src="{% static 'js/create_album.js' %}"></script>
 
-            const clonedForm = emptyTrackForm.cloneNode(true);
-            updatePrefix(clonedForm, newIndex);
-
-            trackFormsContainer.appendChild(clonedForm);
-            totalForms.value = currentForms + 1;
-        });
-
-        // Удаление формы трека
-        trackFormsContainer.addEventListener('click', function (event) {
-            if (event.target.classList.contains('remove-track')) {
-                const trackForm = event.target.closest('.track-form');
-                const deleteInput = trackForm.querySelector('[name$="-DELETE"]');
-                if (deleteInput) {
-                    deleteInput.value = '1';
-                    trackForm.style.display = 'none'; // Скрыть форму
-                }
-            }
-        });
-    });
-</script>
 {% endblock content %}

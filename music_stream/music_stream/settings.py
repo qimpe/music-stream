@@ -40,12 +40,15 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "debug_toolbar",
     "music",
+    "users",
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -104,7 +107,14 @@ AUTH_PASSWORD_VALIDATORS = [
         "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
-
+INTERNAL_IPS = [
+    "127.0.0.1",
+]
+DEBUG_TOOLBAR_CONFIG = {
+    "SHOW_TOOLBAR_CALLBACK": lambda request: DEBUG,  # Показывать только при DEBUG=True
+    "RESULTS_CACHE_SIZE": 100,
+    "IS_RUNNING_TESTS": False,
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/
@@ -128,4 +138,4 @@ STATIC_ROOT = BASE_DIR / "static"
 
 
 MEDIA_URL = "/media/"
-STATIC_ROOT = BASE_DIR / "media"
+MEDIA_ROOT = BASE_DIR / "media"

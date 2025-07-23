@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<div>
+    <h1>Добро пожаловать в профиль, {{user}} !</h1>
+</div>
+<div>
+    {% if not users_artists %}
+    <h2>Не думали стать артистом? Подавай заявку на <a href="{% url 'music:create_artist' %}">создание</a> карточки
+        музыканта и пользуйтесь всеми преимуществами Qimpe
+        Music!</h2>
+    {% else %}
+    {% for user_artist in users_artists %}
+    <ul>
+        <li><a href="{% url 'music:artist_detail' user_artist.artist.id %}"><img src="{{ user_artist.artist.image.url}}"
+                    alt="{{user_artist.artist}}"></li></a>
+        {% endfor %}
+    </ul>
+    {% endif %}
+</div>
+{% endblock content %}</a>
