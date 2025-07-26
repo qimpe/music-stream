@@ -1,0 +1,8 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<form method="post">{% csrf_token %}
+    <p>Вы уверены что хотите удалить альбом - "{{ object }}", ведь его больше никто не услышит?</p>
+    <input type="submit" value="Confirm">
+</form>
+{% endblock content %}

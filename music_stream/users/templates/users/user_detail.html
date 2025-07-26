@@ -10,12 +10,19 @@
         музыканта и пользуйтесь всеми преимуществами Qimpe
         Music!</h2>
     {% else %}
+    {% if users_artists|length == 1 %}
+    <h2>Карточка артиста</h2>
+    {% else %}
+    <h2>Карточки артистов</h2>
+    {% endif %}
     {% for user_artist in users_artists %}
     <ul>
         <li><a href="{% url 'music:artist_detail' user_artist.artist.id %}"><img src="{{ user_artist.artist.image.url}}"
                     alt="{{user_artist.artist}}"></li></a>
+        <h3>{{user_artist.artist}}</h3>
         {% endfor %}
     </ul>
+
     {% endif %}
 </div>
 {% endblock content %}</a>

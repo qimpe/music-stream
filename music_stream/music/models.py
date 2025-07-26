@@ -92,7 +92,7 @@ class Album(Music):
 
 
 class Track(Music):
-    artist = models.ForeignKey(Artist, on_delete=models.CASCADE)
+    artist = models.ForeignKey(Artist, on_delete=models.CASCADE)  # передалать на many to many
     cover = models.ImageField(upload_to="music_covers/", verbose_name="Обложка")
     audio_file = models.FileField(upload_to="tracks/")
     release_date = models.DateTimeField(null=True, verbose_name="Дата релиза")
@@ -216,3 +216,11 @@ class PlaylistGenres(models.Model):
 
     def __str__(self) -> str:
         return f"Playlist {self.playlist} has {self.genre} genre"
+
+
+class ArtistTrack(models.Model):
+    artist = models.ForeignKey(Artist, on_delete=models.CASCADE)
+    track = models.ForeignKey(Track, on_delete=models.CASCADE)
+
+    def __str__(self) -> str:
+        return f"Artist {self.artist} has {self.track} track"

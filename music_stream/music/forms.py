@@ -16,7 +16,7 @@ class ArtistCreateForm(forms.ModelForm):
         fields = ["name", "image", "bio"]
 
 
-class AlbumCreateForm(forms.ModelForm):
+class AlbumForm(forms.ModelForm):
     """Форма создания Альбома."""
 
     cover = forms.ImageField(
@@ -25,9 +25,6 @@ class AlbumCreateForm(forms.ModelForm):
         ],
         help_text="Допустимые форматы: JPG, JPEG, PNG, WEBP. Макс. размер: 5 МБ.",
     )
-    """def clean(self) -> dict[str, Any] | None:
-        cleaned_data=super().clean()
-        cleaned_data["cover"] is None or"""
 
     class Meta(TypedModelMeta):
         model = Album

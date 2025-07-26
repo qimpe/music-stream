@@ -1,17 +1,21 @@
 import typing
 
+from django.conf import settings
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.exceptions import PermissionDenied
 from django.db.models.query import QuerySet
+from django.http import HttpResponse, JsonResponse
 from django.http.request import HttpRequest
-from django.http.response import HttpResponse
-from django.shortcuts import redirect, render
+from django.http.response import HttpResponse, HttpResponseBase, HttpResponseRedirect
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, DetailView, View
+from django.views.generic import CreateView, DeleteView, DetailView, UpdateView, View
 
 from . import services
-from .forms import AlbumCreateForm, ArtistCreateForm, TrackInAlbumFormSet
-from .models import Album, Artist
+from .forms import AlbumForm, ArtistCreateForm, TrackInAlbumFormSet
+from .models import Album, Artist, Track
 
 
 # * index
@@ -31,15 +35,15 @@ class ArtistCreateView(LoginRequiredMixin, CreateView):
     """Представление создания Артиста."""
 
     model = Artist
-    success_url = reverse_lazy("music:index")
     form_class = ArtistCreateForm
+    success_url = "music:index"
     template_name = "music/create_artist.html"
 
     def form_valid(self, form: ArtistCreateForm) -> HttpResponse:
         artist_service = services.ArtistService()
         try:
             artist_service.create_artist(self.request, form)
-            return redirect(self.success_url)
+            return redirect(self.get_success_url())
         except Exception as e:
             messages.error(self.request, f"Ошибка при создании артиста: {e}")
             return self.form_invalid(form)
@@ -60,40 +64,122 @@ class ArtistDetailView(DetailView):
 
     def get_context_data(self, **kwargs: typing.Any) -> dict[str, typing.Any]:
         artist_album_service = services.AlbumArtistService()
+        artist_service = services.ArtistService()
         artist_id = self.kwargs.get("artist_id")
         context = super().get_context_data(**kwargs)
         context["artist_albums"] = artist_album_service.fetch_artist_albums(artist_id)
-        # context["tracks"]=
+        context["releases"] = artist_service.fetch_all_artist_releases(artist_id)
         return context
 
 
-# *album views
+# *Album views
 class AlbumCreateView(LoginRequiredMixin, CreateView):
     """Представление создание альбома и треков которые в него входят."""
 
     model = Album
-    form_class = AlbumCreateForm
-    success_url = reverse_lazy("music:index")
+    form_class = AlbumForm
+    ssuccess_url = "music:index"
     template_name = "music/create_album.html"
 
     def get(self, request: HttpRequest, *args: typing.Any, **kwargs: typing.Any) -> HttpResponse:
         return render(
             request,
-            self.template_name,  # type: ignore
-            {"album_form": AlbumCreateForm(), "track_formset": TrackInAlbumFormSet(prefix="tracks")},
+            str(self.template_name),
+            {"album_form": AlbumForm(), "track_formset": TrackInAlbumFormSet(prefix="tracks")},
         )
 
     def post(self, request: HttpRequest, *args: typing.Any, **kwargs: typing.Any) -> HttpResponse:
-        album_form = AlbumCreateForm(request.POST, request.FILES)
+        album_form = AlbumForm(request.POST, request.FILES)
         track_formset = TrackInAlbumFormSet(request.POST, request.FILES, prefix="tracks")
 
         if album_form.is_valid() and track_formset.is_valid():
             album_service = services.AlbumService()
             album_service.create_album(request.user.id, album_form, track_formset)  # type: ignore
-            return redirect(self.success_url)
+            return redirect(self.get_success_url())
 
         return render(
             request,
-            self.template_name,
+            str(self.template_name),
             {"album_form": album_form, "track_formset": track_formset},
         )
+
+
+class AlbumDeleteView(LoginRequiredMixin, DeleteView):
+    """Представление удаления Album."""
+
+    model = Album
+    pk_url_kwarg = "album_id"
+    success_url = reverse_lazy("music:index")
+    template_name = "music/album_confirm_delete.html"
+
+    def form_valid(self, form: typing.Any) -> HttpResponse:
+        album_id = self.kwargs.get("album_id")
+        album_service = services.AlbumService()
+        album_service.delete_album(album_id)
+        return super().form_valid(form)
+
+
+class AlbumUpdateView(LoginRequiredMixin, UpdateView):
+    """Представление обновления данных о альбоме."""
+
+    model = Album
+    form_class = AlbumForm
+    pk_url_kwarg = "album_id"
+    template_name = "music/update_album.html"
+    success_url = "music:index"
+
+    def get_object(self, queryset: QuerySet | None = ...) -> typing.Any:  # pyright: ignore[reportArgumentType]
+        album_id = self.kwargs.get(self.pk_url_kwarg)
+        album_service = services.AlbumService()
+        return album_service.fetch_album_for_update(album_id)
+
+    def dispatch(self, request: HttpRequest, *args, **kwargs) -> HttpResponseRedirect | HttpResponseBase:
+        try:
+            return super().dispatch(request, *args, **kwargs)
+        except (Album.DoesNotExist, PermissionDenied) as e:
+            msg = "Альбом не найден" if isinstance(e, Album.DoesNotExist) else str(e)
+
+            messages.error(request, msg)
+            return redirect(self.get_success_url())
+
+
+class AlbumDetailView(DetailView):
+    model = Album
+    pk_url_kwarg = "album_id"
+    template_name = "music/album_detail.html"
+    success_url = "music:index"
+
+    def get_object(self, queryset: QuerySet | None = ...) -> typing.Any:  # pyright: ignore[reportArgumentType]
+        album_service = services.AlbumService()
+        return album_service.fetch_album_by_id(self.kwargs.get(self.pk_url_kwarg))
+
+    def get_context_data(self, **kwargs: typing.Any) -> dict[str, typing.Any]:
+        album_tracks_service = services.TrackInAlbumService()
+        context = super().get_context_data(**kwargs)
+
+        tracks = album_tracks_service.fetch_tracks_in_album(self.object.id)
+        context["album_length"] = album_tracks_service.count_album_length_in_minutes(tracks)
+        context["album_tracks"] = tracks
+        return context
+
+
+@login_required
+def get_track_url(request, track_id):
+    Track.objects.get(id=track_id)
+    stream_url = f"/stream/{track_id}/"
+    return JsonResponse({"url": stream_url})
+
+
+@login_required
+def stream_track(request, track_id):
+    track = get_object_or_404(Track, id=track_id)
+    bucket = settings.MINIO_STORAGE_MEDIA_BUCKET_NAME
+    key = track.audio_file.name
+    print(key)
+    internal_path = f"/internal-stream/{bucket}/{key}"
+    print(internal_path)
+    response = HttpResponse()
+    response["X-Accel-Redirect"] = internal_path
+    response["Content-Type"] = "audio/mpeg"  # Настройте в зависимости от типа файла
+    response["Accept-Ranges"] = "bytes"
+    return response

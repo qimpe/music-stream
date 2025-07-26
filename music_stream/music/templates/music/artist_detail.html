@@ -8,11 +8,12 @@
 <h3>{{artist.bio }}</h3>
 {% endif %}
 <div>
-    {% if artist_albums %}
-    {% for artist_album in artist_albums %}
+    {% if releases %}
+    {% for album in releases %}
     <ul>
         <li>
-            <a href="#"><img src="{{artist_album.album.cover.url}}" alt="{{artist_album.album}}_cover"></a>
+            <a href="{% url 'music:album_detail' album.album.id %}"><img src="{{album.album.cover.url}}"
+                    alt="{{artist_album.album}}_cover"></a>
         </li>
     </ul>
     {% endfor %}

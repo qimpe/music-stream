@@ -2,14 +2,14 @@ import typing
 
 import mutagen
 from django.contrib.auth.models import User
-from django.core.exceptions import BadRequest
+from django.core.exceptions import BadRequest, PermissionDenied
 from django.core.files.storage import default_storage
 from django.db import transaction
-from django.db.models import QuerySet
+from django.db.models import QuerySet, Sum
 from django.http.request import HttpRequest
 
-from .forms import AlbumCreateForm, ArtistCreateForm
-from .models import Album, AlbumArtist, Artist, Track, TrackInAlbum, TrackMetadata, UserArtist
+from .forms import AlbumForm, ArtistCreateForm
+from .models import Album, AlbumArtist, Artist, ArtistTrack, Status, Track, TrackInAlbum, TrackMetadata, UserArtist
 
 
 class ArtistService:
@@ -27,6 +27,16 @@ class ArtistService:
     def fetch_artist_queryset_by_id(self, artist_id: int) -> QuerySet[Artist]:
         """Возвращает queryset артиста по его id, если не найден то возвращает пустой queryset."""
         return Artist.objects.filter(id=artist_id)
+
+    def fetch_all_artist_releases(self, artist_id: int) -> QuerySet[Track | Album]:
+        """Возвращает релизы все релизы артиста и сортирует по недавним."""
+        album_serice = AlbumArtistService()
+        artist_track_service = ArtistTrackService()
+        albums = album_serice.fetch_artist_albums(artist_id)
+        print(albums)
+        artist_track_service.fetch_artist_tracks(artist_id)
+        # chain(albums.order_by("release_date"), tracks.order_by("release_date"))
+        return albums
 
 
 class UserArtistService:
@@ -49,7 +59,8 @@ class UserArtistService:
 class AlbumService:
     """Сервис для модели: Album."""
 
-    def create_album(self, user_id: int, album_form: AlbumCreateForm, track_formset) -> Album:
+    #! у несольких треков может быть 1 позиция
+    def create_album(self, user_id: int, album_form: AlbumForm, track_formset) -> Album:
         """Создает альбом и треки которые в него входят."""
         artist_service = UserArtistService()
         album_artist = AlbumArtistService()
@@ -72,6 +83,25 @@ class AlbumService:
             track_service.create_metadata_for_tracks_list(tracks)
             return album
 
+    def delete_album(self, album_id: int) -> None:
+        """Удаляет альбом и все треки которые в него входили."""
+        with transaction.atomic():
+            tracks = Track.objects.filter(trackinalbum__album_id=album_id)
+            tracks.delete()
+            Album.objects.filter(id=album_id).delete()
+
+    def fetch_album_by_id(self, album_id: int) -> Album:
+        """Возращает альбом по его id, в ином случае вызывает исключение."""
+        return Album.objects.get(id=album_id)
+
+    def fetch_album_for_update(self, album_id: int) -> Album:
+        """Возращает альбом по его id, в ином случае вызывает исключение."""
+        album = self.fetch_album_by_id(album_id)
+        if album.status == Status.ACTIVE:
+            msg = "Активный альбом нельзя редактировать"
+            raise PermissionDenied(msg)
+        return album
+
 
 class AlbumArtistService:
     """Сервис для модели: AlbumArtist."""
@@ -82,7 +112,7 @@ class AlbumArtistService:
 
     def fetch_artist_albums(self, artist_id: int) -> QuerySet[AlbumArtist]:
         """Возвращает все альбомы артиста по его id и загужает объекты альбомов."""
-        return AlbumArtist.objects.filter(artist_id=artist_id).select_related("album")
+        return AlbumArtist.objects.filter(artist_id=artist_id)
 
 
 class TrackService:
@@ -159,3 +189,34 @@ class TrackInAlbumService:
         """Добавляет трек в альбом вместе с позицией."""
         tracks_in_album = [TrackInAlbum(album=album, track=track, position=position) for track, position in track_list]
         TrackInAlbum.objects.bulk_create(tracks_in_album)
+
+    def fetch_tracks_in_album(self, album_id: int) -> QuerySet[Track]:
+        """возвращает все треки в альбоме."""
+        track_ids = (
+            TrackInAlbum.objects.filter(album_id=album_id).values_list("track_id", flat=True).order_by("position")
+        )
+        return Track.objects.filter(id__in=track_ids)
+
+    def count_album_length_in_minutes(self, tracks: QuerySet[Track]) -> str:
+        """Возвращает длину альбома в минутах в качестве строки."""
+        duration_in_seconds = (
+            TrackMetadata.objects.filter(track__in=tracks).aggregate(total_duration=Sum("duration"))["total_duration"]
+            or 0
+        )
+        duration = ""
+        hour_in_seconds = 3600
+        if duration_in_seconds > hour_in_seconds:
+            hours = duration_in_seconds // 3600
+            duration += f"{hours}"
+        minutes = (duration_in_seconds % 3600) // 60
+        seconds = duration_in_seconds % 60
+        duration += f"{minutes:02d}:{seconds:02d}"
+        return duration
+
+
+class ArtistTrackService:
+    """Сервис для модели: ArtistTrack."""
+
+    def fetch_artist_tracks(self, artist_id: int) -> QuerySet[Track]:
+        tracks_ids = ArtistTrack.objects.filter(artist_id=artist_id).values_list("track_id", flat=True)
+        return Track.objects.filter(id__in=tracks_ids)

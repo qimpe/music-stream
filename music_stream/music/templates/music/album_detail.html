@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<h3>Альбом</h3>
+<h2>{{album}}</h2><br>
+<h3>Длительность {{album_length}}</h3>
+<hr>
+{% for track in album_tracks %}
+<audio controls preload="metadata">
+    <source src="{% url 'music:stream_track' track_id=track.id %}" type="audio/mpeg">
+    Ваш браузер не поддерживает аудио элемент.
+</audio>
+{{ forloop.counter }} {{track}} <br>
+{% endfor %}
+{% endblock content %}
