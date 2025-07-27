@@ -8,7 +8,7 @@ from django.core.exceptions import PermissionDenied
 from django.db.models.query import QuerySet
 from django.http import HttpResponse, JsonResponse
 from django.http.request import HttpRequest
-from django.http.response import HttpResponse, HttpResponseBase, HttpResponseNotFound, HttpResponseRedirect
+from django.http.response import HttpResponseBase, HttpResponseNotFound, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DeleteView, DetailView, UpdateView, View
@@ -44,10 +44,14 @@ class ArtistCreateView(LoginRequiredMixin, CreateView):
         artist_service = services.ArtistService()
         try:
             artist_service.create_artist(self.request, form)
+            messages.success(self.request, "карточка успешно создана")
             return redirect(self.get_success_url())
         except Exception as e:
             messages.error(self.request, f"Ошибка при создании артиста: {e}")
             return self.form_invalid(form)
+
+    def get_success_url(self) -> str:
+        return reverse_lazy(self.success_url)
 
 
 class ArtistDetailView(DetailView):
@@ -85,34 +89,41 @@ class ManageArtistView(UserManageArtist, View):
 
 
 # *Album views
-class AlbumCreateView(LoginRequiredMixin, CreateView):
+class AlbumCreateView(UserManageArtist, View):
     """Представление создание альбома и треков которые в него входят."""
 
     model = Album
     form_class = AlbumForm
-    ssuccess_url = "music:index"
+    success_url = reverse_lazy("music:index")
     template_name = "music/create_album.html"
 
     def get(self, request: HttpRequest, *args: typing.Any, **kwargs: typing.Any) -> HttpResponse:
-        return render(
-            request,
-            str(self.template_name),
-            {"album_form": AlbumForm(), "track_formset": TrackInAlbumFormSet(prefix="tracks")},
-        )
+        genre_service = services.GenreService()
+        self.genres = genre_service.fetch_all_genres()
+        context = {}
+        context["genres"] = self.genres
+        context["album_form"] = AlbumForm()
+        context["track_formset"] = TrackInAlbumFormSet(prefix="tracks")
+        return render(request, self.template_name, context)  # pyright: ignore[reportArgumentType]
 
     def post(self, request: HttpRequest, *args: typing.Any, **kwargs: typing.Any) -> HttpResponse:
         album_form = AlbumForm(request.POST, request.FILES)
         track_formset = TrackInAlbumFormSet(request.POST, request.FILES, prefix="tracks")
-
         if album_form.is_valid() and track_formset.is_valid():
             album_service = services.AlbumService()
             album_service.create_album(request.user.id, album_form, track_formset)  # type: ignore
-            return redirect(self.get_success_url())
-
+            return redirect(self.success_url)  # type: ignore
+        print(11111111111111111111111)
+        print("Album data:", request.POST)
+        print("Files:", request.FILES.keys())
         return render(
             request,
-            str(self.template_name),
-            {"album_form": album_form, "track_formset": track_formset},
+            self.template_name,
+            {
+                "genres": services.GenreService().fetch_all_genres(),
+                "album_form": album_form,
+                "track_formset": track_formset,
+            },
         )
 
 

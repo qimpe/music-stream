@@ -1,0 +1,82 @@
+
+    .manage-artist {
+        min-height: calc(100vh - 100px);
+    }
+
+    .stat-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+    }
+
+    .create-album-btn,
+    .create-track-btn,
+
+    .artist-card-link {
+        transition: all 0.3s ease;
+    }
+
+    .artist-avatar {
+        position: relative;
+        transition: transform 0.3s ease;
+    }
+
+    .artist-avatar:hover {
+        transform: scale(1.05);
+    }
+
+    .manage-buttons a {
+        font-weight: 500;
+    }
+
+    .album-card {
+        transition: all 0.3s ease;
+    }
+
+    .album-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+    }
+
+    .create-album-btn {
+        transition: all 0.3s ease;
+    }
+
+    .artist-detail {
+        min-height: calc(100vh - 150px);
+    }
+
+
+    .artist-card {
+        transition: all 0.3s ease;
+    }
+
+    .artist-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+    }
+
+    .playlist-card {
+        transition: all 0.3s ease;
+    }
+
+    .playlist-card:hover {
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+    }
+
+    .stat-card {
+        transition: transform 0.3s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-3px);
+    }
+
+    @media (max-width: 768px) {
+        .artist-detail {
+            padding-top: 2rem;
+        }
+    }

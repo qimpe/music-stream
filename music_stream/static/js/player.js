@@ -13,27 +13,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const currentTrack = document.getElementById('current-track');
             const currentArtist = document.getElementById('current-artist');
             
-            // Пример плейлиста
-            const playlist = [
-                {
-                    title: "Summer Vibes",
-                    artist: "Ocean Waves",
-                    cover: "{% static 'images/summer-vibes.jpg' %}",
-                    file: "{% static 'music/summer-vibes.mp3' %}"
-                },
-                {
-                    title: "Midnight Drive",
-                    artist: "Urban Beats",
-                    cover: "{% static 'images/midnight-drive.jpg' %}",
-                    file: "{% static 'music/midnight-drive.mp3' %}"
-                },
-                {
-                    title: "Mountain Echo",
-                    artist: "Nature Sounds",
-                    cover: "{% static 'images/mountain-echo.jpg' %}",
-                    file: "{% static 'music/mountain-echo.mp3' %}"
-                }
-            ];
+            
             
             let currentTrackIndex = 0;
             let isPlaying = false;
@@ -153,10 +133,5 @@ document.addEventListener('DOMContentLoaded', function() {
             setVolume();
             
             // Показать/скрыть плеер
-            document.addEventListener('keydown', function(e) {
-                if (e.key === ' ') {
-                    e.preventDefault();
-                    togglePlay();
-                }
-            });
+            
         });

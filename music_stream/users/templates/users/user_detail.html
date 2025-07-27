@@ -1,40 +1,234 @@
 {% extends "base.html" %}
 
-{% block title %}Profile{% endblock %}
+{% block title %}Профиль {{ user.username }}{% endblock %}
 
 {% block content %}
-<div class="profile-page">
-    <div class="flex items-center mb-8">
-        <img src="{{ user.profile_image.url}}" alt="{{ user.username }}" class="w-24 h-24 rounded-full mr-4">
-        <h1 class="text-3xl font-bold">Welcome, {{ user.username }}</h1>
-    </div>
-    {% if users_artists %}
-    <section class="artists">
-        <h2 class="text-2xl font-bold mb-4">Карточки артистов</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {% for user_artists in users_artists %}
-            <div class="artist-card hover:transition">
-                <a href="{% url 'music:manage_artist' user_artists.artist.id %}">
-                    <img class="rounded-2xl" src="{{user_artists.artist.image.url}}"
-                        alt="{{user_artists.artist}}_image"></a>
+<div class="profile-page max-w-7xl mx-auto p-4 md:p-6">
+    <!-- Заголовок профиля -->
+    <div class="flex items-center justify-between mb-10">
+        <div>
+            <h1 class="text-3xl md:text-4xl font-bold text-white">Добро пожаловать, {{ user.username }}</h1>
 
+        </div>
+        <div class="relative">
+            {% if user.image.url %}
+            <img src="{{ user.image.url }}" alt="Avatar"
+                class="w-16 h-16 md:w-20 md:h-20 rounded-full object-cover border-2 border-rose-600">
+            {% else %}
+            <div
+                class="flex items-center justify-center w-16 h-16 md:w-20 md:h-20 bg-rose-700 rounded-full text-white font-bold text-xl">
+                {{ user.username|capfirst|first }}
             </div>
-            {% endfor %}
+            {% endif %}
+        </div>
+    </div>
 
-    </section>
-    {% endif %}
-    <section class="playlists">
-        <h2 class="text-2xl font-bold mb-4">Your Playlists</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {% for playlist in user.playlists.all %}
-            <div class="playlist-card bg-gray-800 p-4 rounded shadow-lg hover:shadow-xl transition">
-                <h3 class="text-xl font-semibold">{{ playlist.name }}</h3>
-                <p class="text-gray-400">{{ playlist.songs.count }} songs</p>
-                <a href="{% url 'playlist_detail' playlist.id %}" class="text-blue-500 hover:underline">View
-                    Playlist</a>
+    <!-- Секция артистов -->
+    <section class="artists mb-16">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold text-white flex items-center">
+                <svg class="w-6 h-6 mr-2 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z">
+                    </path>
+                </svg>
+                Ваши артисты
+            </h2>
+            <a href="{% url 'music:create_artist' %}"
+                class="text-sm text-rose-500 hover:text-rose-300 flex items-center">
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+                Добавить артиста
+            </a>
+        </div>
+
+        {% if users_artists %}
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
+            {% for user_artists in users_artists %}
+            <div
+                class="artist-card group relative overflow-hidden rounded-2xl transition-all duration-300 hover:shadow-xl hover:shadow-rose-900/30">
+                <a href="{% url 'music:manage_artist' user_artists.artist.id %}">
+                    <img class="w-full h-48 object-cover rounded-2xl group-hover:scale-105 transition-transform duration-300"
+                        src="{{ user_artists.artist.image.url }}" alt="{{ user_artists.artist }}">
+                    <div
+                        class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent rounded-2xl">
+                    </div>
+                    <div class="absolute bottom-0 left-0 right-0 p-4">
+                        <h3 class="text-lg font-bold text-white truncate">{{ user_artists.artist.name }}</h3>
+                        <p class="text-gray-300 text-sm">Артист</p>
+                    </div>
+                </a>
+                <div
+                    class="absolute top-3 right-3 bg-black/50 rounded-full p-1 group-hover:opacity-100 opacity-0 transition-opacity">
+                    <svg class="w-5 h-5 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z">
+                        </path>
+                    </svg>
+                </div>
             </div>
             {% endfor %}
         </div>
+        {% else %}
+        <div class="bg-gradient-to-br from-zinc-900 to-zinc-800 border border-zinc-700 rounded-2xl p-8 text-center">
+            <svg class="w-16 h-16 mx-auto text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z">
+                </path>
+            </svg>
+            <h3 class="text-xl font-bold text-white mt-4">У вас пока нет артистов</h3>
+            <p class="text-gray-400 mt-2 mb-6">Создайте карточку артиста, чтобы управлять своей музыкой</p>
+            <a href="{% url 'music:create_artist' %}"
+                class="inline-block bg-gradient-to-r from-rose-700 to-rose-900 hover:from-rose-600 hover:to-rose-800 text-white font-medium py-3 px-6 rounded-full transition-all">
+                Стать артистом
+            </a>
+        </div>
+        {% endif %}
+    </section>
+
+    <!-- Секция плейлистов -->
+    <section class="playlists">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold text-white flex items-center">
+                <svg class="w-6 h-6 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
+                </svg>
+                Ваши плейлисты
+            </h2>
+            <a href="#" class="text-sm text-blue-500 hover:text-blue-300 flex items-center">
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+                Создать плейлист
+            </a>
+        </div>
+
+        {% if user.playlists.all %}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+            {% for playlist in user.playlists.all %}
+            <div
+                class="playlist-card bg-gradient-to-br from-zinc-900 to-zinc-800 border border-zinc-700 rounded-2xl overflow-hidden transition-transform duration-300 hover:-translate-y-2 hover:shadow-xl">
+                <div class="flex">
+                    <div class="w-1/3 bg-gradient-to-r from-blue-900 to-blue-700 flex items-center justify-center">
+                        <svg class="w-12 h-12 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z">
+                            </path>
+                        </svg>
+                    </div>
+                    <div class="w-2/3 p-4">
+                        <h3 class="text-lg font-bold text-white truncate">{{ playlist.name }}</h3>
+                        <p class="text-gray-400 mt-1">{{ playlist.songs.count }} треков</p>
+                        <div class="mt-4">
+                            <a href="{% url 'playlist_detail' playlist.id %}"
+                                class="inline-flex items-center text-blue-500 hover:text-blue-300">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z">
+                                    </path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                Открыть плейлист
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="bg-gradient-to-br from-zinc-900 to-zinc-800 border border-zinc-700 rounded-2xl p-8 text-center">
+            <svg class="w-16 h-16 mx-auto text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
+            </svg>
+            <h3 class="text-xl font-bold text-white mt-4">У вас пока нет плейлистов</h3>
+            <p class="text-gray-400 mt-2">Создайте свой первый плейлист, чтобы сохранить любимые треки</p>
+        </div>
+        {% endif %}
+    </section>
+
+    <!-- Статистика прослушиваний -->
+    <section class="mt-16">
+        <h2 class="text-2xl font-bold text-white mb-6 flex items-center">
+            <svg class="w-6 h-6 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
+                </path>
+            </svg>
+            Ваша статистика
+        </h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="stat-card bg-gradient-to-br from-zinc-900 to-zinc-800 border border-zinc-700 rounded-2xl p-5">
+                <div class="flex justify-between">
+                    <div>
+                        <p class="text-gray-400">Всего прослушиваний</p>
+                        <p class="text-2xl font-bold text-white mt-2">1,245</p>
+                    </div>
+                    <div class="bg-green-900/30 rounded-lg p-2">
+                        <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z">
+                            </path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stat-card bg-gradient-to-br from-zinc-900 to-zinc-800 border border-zinc-700 rounded-2xl p-5">
+                <div class="flex justify-between">
+                    <div>
+                        <p class="text-gray-400">Любимых артистов</p>
+                        <p class="text-2xl font-bold text-white mt-2">12</p>
+                    </div>
+                    <div class="bg-rose-900/30 rounded-lg p-2">
+                        <svg class="w-6 h-6 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z">
+                            </path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stat-card bg-gradient-to-br from-zinc-900 to-zinc-800 border border-zinc-700 rounded-2xl p-5">
+                <div class="flex justify-between">
+                    <div>
+                        <p class="text-gray-400">Общее время</p>
+                        <p class="text-2xl font-bold text-white mt-2">42 ч</p>
+                    </div>
+                    <div class="bg-blue-900/30 rounded-lg p-2">
+                        <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
     </section>
 </div>
+
+
 {% endblock %}

@@ -19,12 +19,15 @@ class ArtistCreateForm(forms.ModelForm):
 class AlbumForm(forms.ModelForm):
     """Форма создания Альбома."""
 
+    title = forms.CharField(required=True)
     cover = forms.ImageField(
+        required=True,
         validators=[
             FileExtensionValidator(allowed_extensions=["jpg", "jpeg", "png", "webp"]),
         ],
         help_text="Допустимые форматы: JPG, JPEG, PNG, WEBP. Макс. размер: 5 МБ.",
     )
+    genre = forms.CharField()
 
     class Meta(TypedModelMeta):
         model = Album
@@ -46,24 +49,26 @@ class TrackCreateForm(forms.ModelForm):
 
 
 class TrackInAlbumForm(forms.ModelForm):
-    # Поля для создания нового трека
-    track_title = forms.CharField(max_length=255, label="Название трека")
+    track_title = forms.CharField(max_length=255, label="Название трека", required=True)
     is_explicit = forms.BooleanField(required=False)
     audio_file = forms.FileField(
+        required=True,
         validators=[
             FileExtensionValidator(allowed_extensions=["mp3", "wav", "flac"]),
         ],
     )
     position = forms.IntegerField(
+        required=True,
         min_value=1,  # Устанавливаем минимальное значение
         label="Позиция",
         help_text="Позиция трека в альбоме (начиная с 1)",
         initial=1,
     )
+    genre = forms.CharField(max_length=50)
 
     class Meta:
         model = TrackInAlbum
-        fields = ["position"]
+        fields = ["position", "genre"]
 
     def clean_position(self) -> int:
         position = self.cleaned_data.get("position")

@@ -9,8 +9,10 @@ from django_stubs_ext.db.models import TypedModelMeta
 # Create your models here.
 class Status(models.TextChoices):
     ACTIVE = ("active", "Активен")
+    CREATED = ("created", "Создан")
     PENDING = ("in_pending", "На рассмотрении")
     REJECTED = ("rejected", "Отклонен")
+    DELETED = ("deleted", "Удален")
 
 
 class Music(models.Model):
@@ -38,10 +40,12 @@ class Artist(models.Model):
     image = models.ImageField(upload_to="artists_images/", verbose_name="Фото")
     bio = models.TextField(default="", blank=True, verbose_name="Биография")
     status = models.CharField(
-        max_length=15, choices=Status.choices, null=False, default=Status.PENDING, verbose_name="Статус"
+        max_length=15, choices=Status.choices, null=False, default=Status.CREATED, verbose_name="Статус"
     )
+
     balance = models.IntegerField(default=0, null=False, verbose_name="Баланс")
 
+    # created_at = models.DateTimeField(auto_now_add=True)
     class Meta(TypedModelMeta):
         indexes = [
             models.Index(fields=["name"], name="idx_artist_name"),
@@ -60,7 +64,12 @@ class Artist(models.Model):
 
 class Genre(models.Model):
     title = models.CharField(null=False, blank=False, max_length=128, unique=True)
-    slug = models.SlugField(null=False, max_length=128, unique=True)
+    slug = models.SlugField(null=False, max_length=128)
+    description = models.TextField()
+    origin_country = models.CharField(max_length=100, null=False)
+    decade_emerged = models.PositiveSmallIntegerField()
+    min_bpm = models.PositiveSmallIntegerField(null=True, blank=True)
+    max_bpm = models.PositiveSmallIntegerField(null=True, blank=True)
 
     class Meta(TypedModelMeta):
         indexes = [

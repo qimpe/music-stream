@@ -1,0 +1,607 @@
+[
+  {
+    "model": "music.genre",
+    "fields": {
+      "title": "Rock",
+      "description": "Guitar-oriented music with a focus on rhythm section. Originated in the 1950s as 'rock and roll'.",
+      "origin_country": "USA/UK",
+      "decade_emerged": 1950,
+      "min_bpm": 90,
+      "max_bpm": 140
+    }
+  },
+  {
+    "model": "music.genre",
+    "fields": {
+      "title": "Jazz",
+      "description": "Improvisational music with syncopated rhythms and complex harmony.",
+      "origin_country": "USA",
+      "decade_emerged": 1900,
+      "min_bpm": 90,
+      "max_bpm": 180
+    }
+  },
+  {
+    "model": "music.genre",
+    "fields": {
+      "title": "Hip-Hop",
+      "description": "Rhythmic music with rap vocals and electronic beats.",
+      "origin_country": "USA",
+      "decade_emerged": 1970,
+      "min_bpm": 80,
+      "max_bpm": 115
+    }
+  },
+  {
+    "model": "music.genre",
+    "fields": {
+      "title": "Classical",
+      "description": "Academic music of the European tradition with complex structure.",
+      "origin_country": "Europe",
+      "decade_emerged": 1500,
+      "min_bpm": null,
+      "max_bpm": null
+    }
+  },
+  {
+    "model": "music.genre",
+    "fields": {
+      "title": "Electronic",
+      "description": "Music created using electronic instruments and technology.",
+      "origin_country": "Global",
+      "decade_emerged": 1970,
+      "min_bpm": 120,
+      "max_bpm": 160
+    }
+  },
+  {
+    "model": "music.genre",
+    "fields": {
+      "title": "Reggae",
+      "description": "Jamaican style with emphasis on bass and 'skank' rhythm.",
+      "origin_country": "Jamaica",
+      "decade_emerged": 1960,
+      "min_bpm": 80,
+      "max_bpm": 90
+    }
+  },
+  {
+    "model": "music.genre",
+    "fields": {
+      "title": "Pop",
+      "description": "Catchy, melody-driven music designed for mainstream appeal.",
+      "origin_country": "Global",
+      "decade_emerged": 1950,
+      "min_bpm": 100,
+      "max_bpm": 130
+    }
+  },
+  {
+    "model": "music.genre",
+    "fields": {
+      "title": "Blues",
+      "description": "Soulful music with expressive vocals and repetitive chord progressions.",
+      "origin_country": "USA",
+      "decade_emerged": 1900,
+      "min_bpm": 60,
+      "max_bpm": 120
+    }
+  },
+  {
+    "model": "music.genre",
+    "fields": {
+      "title": "Country",
+      "description": "Storytelling music with acoustic instruments and vocal harmonies.",
+      "origin_country": "USA",
+      "decade_emerged": 1920,
+      "min_bpm": 80,
+      "max_bpm": 120
+    }
+  },
+  {
+    "model": "music.genre",
+    "fields": {
+      "title": "Folk",
+      "description": "Traditional music with acoustic instruments and narrative lyrics.",
+      "origin_country": "Global",
+      "decade_emerged": 1800,
+      "min_bpm": null,
+      "max_bpm": null
+    }
+  },
+  {
+    "model": "music.genre",
+    "fields": {
+      "title": "Metal",
+      "description": "Aggressive, guitar-heavy music with complex rhythms and intense vocals.",
+      "origin_country": "UK/USA",
+      "decade_emerged": 1970,
+      "min_bpm": 100,
+      "max_bpm": 200
+    }
+  },
+  {
+    "model": "music.genre",
+    "fields": {
+      "title": "R&B",
+      "description": "Rhythm and blues with soulful vocals and smooth melodies.",
+      "origin_country": "USA",
+      "decade_emerged": 1940,
+      "min_bpm": 80,
+      "max_bpm": 140
+    }
+  },
+  {
+    "model": "music.genre",
+    "fields": {
+      "title": "Punk",
+      "description": "Fast-paced, rebellious music with simple chords and raw energy.",
+      "origin_country": "UK/USA",
+      "decade_emerged": 1970,
+      "min_bpm": 140,
+      "max_bpm": 200
+    }
+  },
+  {
+    "model": "music.genre",
+    "fields": {
+      "title": "Soul",
+      "description": "Emotional music with gospel influences and strong vocal performances.",
+      "origin_country": "USA",
+      "decade_emerged": 1950,
+      "min_bpm": 80,
+      "max_bpm": 120
+    }
+  },
+  {
+    "model": "music.genre",
+    "fields": {
+      "title": "Funk",
+      "description": "Groove-heavy music with syncopated basslines and rhythmic complexity.",
+      "origin_country": "USA",
+      "decade_emerged": 1960,
+      "min_bpm": 90,
+      "max_bpm": 120
+    }
+  },
+  {
+    "model": "music.genre",
+    "fields": {
+      "title": "Disco",
+      "description": "Dance music with upbeat rhythms and lush orchestration.",
+      "origin_country": "USA",
+      "decade_emerged": 1970,
+      "min_bpm": 110,
+      "max_bpm": 130
+    }
+  },
+  {
+    "model": "music.genre",
+    "fields": {
+      "title": "Techno",
+      "description": "Electronic dance music with repetitive beats and synthesized sounds.",
+      "origin_country": "USA/Germany",
+      "decade_emerged": 1980,
+      "min_bpm": 120,
+      "max_bpm": 150
+    }
+  },
+  {
+    "model": "music.genre",
+    "fields": {
+      "title": "House",
+      "description": "Electronic dance music with a steady four-on-the-floor beat.",
+      "origin_country": "USA",
+      "decade_emerged": 1980,
+      "min_bpm": 120,
+      "max_bpm": 130
+    }
+  },
+  {
+    "model": "music.genre",
+    "fields": {
+      "title": "Trance",
+      "description": "Electronic music with uplifting melodies and long build-ups.",
+      "origin_country": "Germany",
+      "decade_emerged": 1990,
+      "min_bpm": 130,
+      "max_bpm": 160
+    }
+  },
+  {
+    "model": "music.genre",
+    "fields": {
+      "title": "Drum and Bass",
+      "description": "Fast-paced electronic music with heavy basslines and breakbeats.",
+      "origin_country": "UK",
+      "decade_emerged": 1990,
+      "min_bpm": 160,
+      "max_bpm": 180
+    }
+  },
+  {
+    "model": "music.genre",
+    "fields": {
+      "title": "Dubstep",
+      "description": "Electronic music with heavy bass drops and syncopated rhythms.",
+      "origin_country": "UK",
+      "decade_emerged": 2000,
+      "min_bpm": 140,
+      "max_bpm": 140
+    }
+  },
+  {
+    "model": "music.genre",
+    "fields": {
+      "title": "Grunge",
+      "description": "Raw, distorted guitar music with angst-filled lyrics.",
+      "origin_country": "USA",
+      "decade_emerged": 1990,
+      "min_bpm": 100,
+      "max_bpm": 140
+    }
+  },
+  {
+    "model": "music.genre",
+    "fields": {
+      "title": "Alternative Rock",
+      "description": "Non-mainstream rock with eclectic influences and experimental sounds.",
+      "origin_country": "USA/UK",
+      "decade_emerged": 1980,
+      "min_bpm": 100,
+      "max_bpm": 140
+    }
+  },
+  {
+    "model": "music.genre",
+    "fields": {
+      "title": "Indie Rock",
+      "description": "Independent rock music with a focus on artistic expression.",
+      "origin_country": "Global",
+      "decade_emerged": 1980,
+      "min_bpm": 100,
+      "max_bpm": 150
+    }
+  },
+  {
+    "model": "music.genre",
+    "fields": {
+      "title": "Ska",
+      "description": "Upbeat music with offbeat guitar rhythms and horn sections.",
+      "origin_country": "Jamaica",
+      "decade_emerged": 1950,
+      "min_bpm": 120,
+      "max_bpm": 140
+    }
+  },
+  {
+    "model": "music.genre",
+    "fields": {
+      "title": "Dancehall",
+      "description": "Up-tempo reggae with digital instrumentation and deejay vocals.",
+      "origin_country": "Jamaica",
+      "decade_emerged": 1980,
+      "min_bpm": 90,
+      "max_bpm": 110
+    }
+  },
+  {
+    "model": "music.genre",
+    "fields": {
+      "title": "Gospel",
+      "description": "Christian music with soulful vocals and uplifting lyrics.",
+      "origin_country": "USA",
+      "decade_emerged": 1900,
+      "min_bpm": 80,
+      "max_bpm": 120
+    }
+  },
+  {
+    "model": "music.genre",
+    "fields": {
+      "title": "Bluegrass",
+      "description": "Acoustic string music with fast tempos and intricate picking.",
+      "origin_country": "USA",
+      "decade_emerged": 1940,
+      "min_bpm": 120,
+      "max_bpm": 160
+    }
+  },
+  {
+    "model": "music.genre",
+    "fields": {
+      "title": "Swing",
+      "description": "Upbeat jazz with a focus on danceable rhythms and big band arrangements.",
+      "origin_country": "USA",
+      "decade_emerged": 1930,
+      "min_bpm": 120,
+      "max_bpm": 180
+    }
+  },
+  {
+    "model": "music.genre",
+    "fields": {
+      "title": "Bebop",
+      "description": "Complex jazz with fast tempos and intricate improvisation.",
+      "origin_country": "USA",
+      "decade_emerged": 1940,
+      "min_bpm": 150,
+      "max_bpm": 200
+    }
+  },
+  {
+    "model": "music.genre",
+    "fields": {
+      "title": "Fusion",
+      "description": "Jazz blended with rock, funk, and other genres.",
+      "origin_country": "USA",
+      "decade_emerged": 1960,
+      "min_bpm": 100,
+      "max_bpm": 160
+    }
+  },
+  {
+    "model": "music.genre",
+    "fields": {
+      "title": "Ambient",
+      "description": "Atmospheric electronic music focused on mood and texture.",
+      "origin_country": "Global",
+      "decade_emerged": 1970,
+      "min_bpm": 60,
+      "max_bpm": 100
+    }
+  },
+  {
+    "model": "music.genre",
+    "fields": {
+      "title": "Chillout",
+      "description": "Relaxed electronic music with smooth beats and mellow vibes.",
+      "origin_country": "Global",
+      "decade_emerged": 1990,
+      "min_bpm": 90,
+      "max_bpm": 120
+    }
+  },
+  {
+    "model": "music.genre",
+    "fields": {
+      "title": "Trip-Hop",
+      "description": "Downtempo electronic music with hip-hop influences and moody atmospheres.",
+      "origin_country": "UK",
+      "decade_emerged": 1990,
+      "min_bpm": 80,
+      "max_bpm": 110
+    }
+  },
+  {
+    "model": "music.genre",
+    "fields": {
+      "title": "Breakbeat",
+      "description": "Electronic music with syncopated drum patterns and sampled breaks.",
+      "origin_country": "UK",
+      "decade_emerged": 1990,
+      "min_bpm": 130,
+      "max_bpm": 150
+    }
+  },
+  {
+    "model": "music.genre",
+    "fields": {
+      "title": "Hard Rock",
+      "description": "Heavy, aggressive rock with loud guitars and powerful vocals.",
+      "origin_country": "USA/UK",
+      "decade_emerged": 1960,
+      "min_bpm": 100,
+      "max_bpm": 160
+    }
+  },
+  {
+    "model": "music.genre",
+    "fields": {
+      "title": "Progressive Rock",
+      "description": "Complex rock music with extended compositions and conceptual themes.",
+      "origin_country": "UK",
+      "decade_emerged": 1960,
+      "min_bpm": 90,
+      "max_bpm": 140
+    }
+  },
+  {
+    "model": "music.genre",
+    "fields": {
+      "title": "Post-Rock",
+      "description": "Instrumental rock with atmospheric textures and dynamic shifts.",
+      "origin_country": "Global",
+      "decade_emerged": 1990,
+      "min_bpm": 80,
+      "max_bpm": 120
+    }
+  },
+  {
+    "model": "music.genre",
+    "fields": {
+      "title": "Shoegaze",
+      "description": "Dreamy rock with layered guitars and ethereal vocals.",
+      "origin_country": "UK",
+      "decade_emerged": 1980,
+      "min_bpm": 100,
+      "max_bpm": 130
+    }
+  },
+  {
+    "model": "music.genre",
+    "fields": {
+      "title": "Britpop",
+      "description": "Melodic rock with a focus on British culture and catchy hooks.",
+      "origin_country": "UK",
+      "decade_emerged": 1990,
+      "min_bpm": 100,
+      "max_bpm": 140
+    }
+  },
+  {
+    "model": "music.genre",
+    "fields": {
+      "title": "Emo",
+      "description": "Emotional rock with introspective lyrics and melodic elements.",
+      "origin_country": "USA",
+      "decade_emerged": 1980,
+      "min_bpm": 120,
+      "max_bpm": 160
+    }
+  },
+  {
+    "model": "music.genre",
+    "fields": {
+      "title": "Post-Punk",
+      "description": "Dark, experimental rock with angular guitars and moody aesthetics.",
+      "origin_country": "UK",
+      "decade_emerged": 1970,
+      "min_bpm": 120,
+      "max_bpm": 160
+    }
+  },
+  {
+    "model": "music.genre",
+    "fields": {
+      "title": "New Wave",
+      "description": "Upbeat, synth-heavy rock with pop sensibilities.",
+      "origin_country": "UK/USA",
+      "decade_emerged": 1970,
+      "min_bpm": 120,
+      "max_bpm": 150
+    }
+  },
+  {
+    "model": "music.genre",
+    "fields": {
+      "title": "Synthpop",
+      "description": "Electronic pop music with prominent synthesizers and catchy melodies.",
+      "origin_country": "UK",
+      "decade_emerged": 1980,
+      "min_bpm": 110,
+      "max_bpm": 140
+    }
+  },
+  {
+    "model": "music.genre",
+    "fields": {
+      "title": "Industrial",
+      "description": "Harsh, mechanical music with electronic and experimental elements.",
+      "origin_country": "UK/USA",
+      "decade_emerged": 1970,
+      "min_bpm": 100,
+      "max_bpm": 140
+    }
+  },
+  {
+    "model": "music.genre",
+    "fields": {
+      "title": "Gothic Rock",
+      "description": "Dark, moody rock with dramatic vocals and atmospheric instrumentation.",
+      "origin_country": "UK",
+      "decade_emerged": 1980,
+      "min_bpm": 100,
+      "max_bpm": 140
+    }
+  },
+  {
+    "model": "music.genre",
+    "fields": {
+      "title": "Neo-Soul",
+      "description": "Modern soul music with jazz, funk, and hip-hop influences.",
+      "origin_country": "USA",
+      "decade_emerged": 1990,
+      "min_bpm": 80,
+      "max_bpm": 120
+    }
+  },
+  {
+    "model": "music.genre",
+    "fields": {
+      "title": "Trap",
+      "description": "Hip-hop subgenre with heavy bass, hi-hats, and electronic production.",
+      "origin_country": "USA",
+      "decade_emerged": 2000,
+      "min_bpm": 70,
+      "max_bpm": 90
+    }
+  },
+  {
+    "model": "music.genre",
+    "fields": {
+      "title": "Afrobeats",
+      "description": "West African pop music with rhythmic percussion and vibrant melodies.",
+      "origin_country": "Nigeria/Ghana",
+      "decade_emerged": 2000,
+      "min_bpm": 100,
+      "max_bpm": 120
+    }
+  },
+  {
+    "model": "music.genre",
+    "fields": {
+      "title": "K-Pop",
+      "description": "Korean pop music with catchy melodies and choreographed performances.",
+      "origin_country": "South Korea",
+      "decade_emerged": 1990,
+      "min_bpm": 100,
+      "max_bpm": 140
+    }
+  },
+  {
+    "model": "music.genre",
+    "fields": {
+      "title": "Reggaeton",
+      "description": "Latin music with reggae rhythms and hip-hop influences.",
+      "origin_country": "Puerto Rico",
+      "decade_emerged": 1990,
+      "min_bpm": 90,
+      "max_bpm": 100
+    }
+  },
+  {
+    "model": "music.genre",
+    "fields": {
+      "title": "Salsa",
+      "description": "Latin dance music with complex rhythms and brass sections.",
+      "origin_country": "Cuba/USA",
+      "decade_emerged": 1960,
+      "min_bpm": 160,
+      "max_bpm": 220
+    }
+  },
+  {
+    "model": "music.genre",
+    "fields": {
+      "title": "Bossa Nova",
+      "description": "Brazilian music with smooth melodies and syncopated rhythms.",
+      "origin_country": "Brazil",
+      "decade_emerged": 1950,
+      "min_bpm": 120,
+      "max_bpm": 140
+    }
+  },
+  {
+    "model": "music.genre",
+    "fields": {
+      "title": "Flamenco",
+      "description": "Spanish music with passionate vocals and intricate guitar work.",
+      "origin_country": "Spain",
+      "decade_emerged": 1800,
+      "min_bpm": null,
+      "max_bpm": null
+    }
+  },
+  {
+    "model": "music.genre",
+    "fields": {
+      "title": "Tango",
+      "description": "Argentinian dance music with dramatic melodies and accordion.",
+      "origin_country": "Argentina",
+      "decade_emerged": 1880,
+      "min_bpm": 120,
+      "max_bpm": 130
+    }
+  }
+]

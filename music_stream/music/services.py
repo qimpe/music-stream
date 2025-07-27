@@ -9,7 +9,18 @@ from django.db.models import QuerySet, Sum
 from django.http.request import HttpRequest
 
 from .forms import AlbumForm, ArtistCreateForm
-from .models import Album, AlbumArtist, Artist, ArtistTrack, Status, Track, TrackInAlbum, TrackMetadata, UserArtist
+from .models import (
+    Album,
+    AlbumArtist,
+    Artist,
+    ArtistTrack,
+    Genre,
+    Status,
+    Track,
+    TrackInAlbum,
+    TrackMetadata,
+    UserArtist,
+)
 
 
 class ArtistService:
@@ -17,9 +28,8 @@ class ArtistService:
 
     def create_artist(self, request: HttpRequest, form: ArtistCreateForm) -> Artist:
         """Создает артиста или вызывает исключение при ошибке."""
-        artist = form.save(commit=False)
         with transaction.atomic():
-            artist.save()
+            artist = form.save()
             user_artist_service = UserArtistService()
             user_artist_service.create_user_artist(request.user, artist)  # type: ignore
             return artist
@@ -30,9 +40,9 @@ class ArtistService:
 
     def fetch_all_artist_releases(self, artist_id: int) -> QuerySet[Track | Album]:
         """Возвращает релизы все релизы артиста и сортирует по недавним."""
-        album_serice = AlbumArtistService()
+        album_service = AlbumArtistService()
         artist_track_service = ArtistTrackService()
-        albums = album_serice.fetch_artist_albums(artist_id)
+        albums = album_service.fetch_artist_albums(artist_id)
         print(albums)
         artist_track_service.fetch_artist_tracks(artist_id)
         # chain(albums.order_by("release_date"), tracks.order_by("release_date"))
@@ -45,7 +55,7 @@ class UserArtistService:
     def create_user_artist(self, user: User, artist: Artist) -> UserArtist:
         """Привязывает к пользователю артиста и возвращает объект."""
         if UserArtist.objects.filter(user=user, artist=artist).exists():
-            msg = "Artist alredy in album"
+            msg = "Artist already in album"
             raise BadRequest(msg)
         return UserArtist.objects.create(user=user, artist=artist)
 
@@ -73,7 +83,7 @@ class AlbumService:
                 raise ValueError(msg)
             artist = users_artist.artist
             album = album_form.save()
-
+            print(album.genre)
             tracks_with_positions = track_service.create_track_from_formset(track_formset, artist)
             tracks_data = [track for track, position in tracks_with_positions]
             tracks = Track.objects.bulk_create(tracks_data)
@@ -91,11 +101,11 @@ class AlbumService:
             Album.objects.filter(id=album_id).delete()
 
     def fetch_album_by_id(self, album_id: int) -> Album:
-        """Возращает альбом по его id, в ином случае вызывает исключение."""
+        """Возвращает альбом по его id, в ином случае вызывает исключение."""
         return Album.objects.get(id=album_id)
 
     def fetch_album_for_update(self, album_id: int) -> Album:
-        """Возращает альбом по его id, в ином случае вызывает исключение."""
+        """Возвращает альбом по его id, в ином случае вызывает исключение."""
         album = self.fetch_album_by_id(album_id)
         if album.status == Status.ACTIVE:
             msg = "Активный альбом нельзя редактировать"
@@ -220,3 +230,10 @@ class ArtistTrackService:
     def fetch_artist_tracks(self, artist_id: int) -> QuerySet[Track]:
         tracks_ids = ArtistTrack.objects.filter(artist_id=artist_id).values_list("track_id", flat=True)
         return Track.objects.filter(id__in=tracks_ids)
+
+
+class GenreService:
+    """Сервис для модели: Genre."""
+
+    def fetch_all_genres(self) -> QuerySet[Genre]:
+        return Genre.objects.all().only("title")

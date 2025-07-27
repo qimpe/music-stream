@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Album, AlbumArtist, Artist, Track, TrackInAlbum, TrackMetadata, UserArtist
+from .models import Album, AlbumArtist, Artist, Genre, Track, TrackInAlbum, TrackMetadata, UserArtist
 
 # Register your models here.
 
@@ -56,4 +56,5 @@ admin.site.register(TrackMetadata)
 admin.site.register(TrackInAlbum)
 admin.site.register(UserArtist)
 admin.site.register(AlbumArtist)
+admin.site.register(Genre)
 admin.site.register(Album, AlbumAdmin)
