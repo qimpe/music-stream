@@ -1,15 +1,28 @@
-{% extends 'base.html' %}
-{% load static %}
+{% extends "base.html" %}
+
+{% block title %}{{ album.title }}{% endblock %}
+
 {% block content %}
-<h3>Альбом</h3>
-<h2>{{album}}</h2><br>
-<h3>Длительность {{album_length}}</h3>
-<hr>
-{% for track in album_tracks %}
-<audio controls preload="metadata">
-    <source src="{% url 'music:stream_track' track_id=track.id %}" type="audio/mpeg">
-    Ваш браузер не поддерживает аудио элемент.
-</audio>
-{{ forloop.counter }} {{track}} <br>
-{% endfor %}
-{% endblock content %}
+<div class="album-detail">
+    <img src="{{ album.cover.url }}" alt="{{ album.title }}" class="w-full h-64 object-cover rounded mb-4">
+    <h1 class="text-4xl font-bold mb-2">{{ album.title }}</h1>
+    <p class="text-gray-400 mb-8">By {{ album.artist.name }}</p>
+    <button class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded mb-4">Play All</button>
+    <h2 class="text-2xl font-bold mb-4">Tracks</h2>
+    <ul class="track-list divide-y divide-gray-700">
+        {% for track in album.tracks.all %}
+        <li class="flex items-center space-x-4 py-2">
+            <button class="play-track text-white" data-src="{{ track.audio.url }}" data-title="{{ track.title }}"
+                data-artist="{{ album.artist.name }}">
+                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+                    <path d="M14 10l-2 2m0 0l-2-2m2 2v6m2-6v6m-6-6h6m-6 6H6"></path>
+                </svg>
+            </button>
+            <span class="flex-1">{{ track.title }}</span>
+            <span class="text-gray-400">{{ track.duration }}</span>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

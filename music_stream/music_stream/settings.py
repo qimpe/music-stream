@@ -40,15 +40,19 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "tailwind",
     "debug_toolbar",
     "minio_storage",
+    "django_browser_reload",
     "music",
     "users",
+    "theme",
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "django_browser_reload.middleware.BrowserReloadMiddleware",
     "debug_toolbar.middleware.DebugToolbarMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -86,6 +90,7 @@ CSRF_TRUSTED_ORIGINS = [
     "http://127.0.0.1",
     # Добавьте другие домены при необходимости
 ]
+
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
@@ -97,7 +102,7 @@ DATABASES = {
 }
 
 
-STORAGES = {
+"""STORAGES = {
     "default": {
         "BACKEND": "minio_storage.MinioMediaStorage",
     },
@@ -113,7 +118,7 @@ MINIO_STORAGE_MEDIA_BUCKET_NAME = os.getenv("MINIO_STORAGE_MEDIA_BUCKET_NAME")
 MINIO_STORAGE_STATIC_BUCKET_NAME = os.getenv("MINIO_STORAGE_STATIC_BUCKET_NAME")
 MINIO_STORAGE_MEDIA_USE_PRESIGNED = os.getenv("MINIO_STORAGE_MEDIA_USE_PRESIGNED")
 MINIO_STORAGE_USE_HTTPS = False
-MINIO_STORAGE_SECURE = False
+MINIO_STORAGE_SECURE = False"""
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
@@ -159,6 +164,12 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
+TAILWIND_APP_NAME = "theme"
+NPM_BIN_PATH = "C:/Program Files/nodejs/npm.cmd"
 
 STATIC_URL = "/static/"
-STATIC_ROOT = BASE_DIR / "static"
+STATICFILES_DIRS = [BASE_DIR / "static"]
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"

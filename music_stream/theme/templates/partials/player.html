@@ -1,0 +1,33 @@
+<div id="player" class="fixed bottom-0 left-0 right-0 bg-gray-800 p-4 flex items-center z-50">
+    <div class="flex-1">
+        <span id="track-title" class="text-white font-semibold"></span>
+        <span id="track-artist" class="text-gray-400 ml-2"></span>
+    </div>
+    <div class="flex items-center space-x-4">
+        <button id="prev" class="text-white"><svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+                <path d="M15 19l-7-7 7-7"></path>
+            </svg></button>
+        <button id="play-pause" class="text-white"><svg class="h-6 w-6" fill="none" stroke="currentColor"
+                viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" stroke-linecap="round" stroke-linejoin="round"
+                stroke-width="2">
+                <path d="M14 10l-2 2m0 0l-2-2m2 2v6m2-6v6m-6-6h6m-6 6H6"></path>
+            </svg></button>
+        <button id="next" class="text-white"><svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+                <path d="M9 5l7 7-7 7"></path>
+            </svg></button>
+    </div>
+    <div class="flex-1 mx-4">
+        <input type="range" id="progress" class="w-full" value="0" min="0" max="100">
+    </div>
+    <div>
+        <button id="volume" class="text-white"><svg class="h-6 w-6" fill="none" stroke="currentColor"
+                viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" stroke-linecap="round" stroke-linejoin="round"
+                stroke-width="2">
+                <path
+                    d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.943.984L5.586 15z">
+                </path>
+            </svg></button>
+    </div>
+</div>

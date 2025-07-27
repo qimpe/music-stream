@@ -1,49 +1,41 @@
 {% extends "base.html" %}
-{% load static %}
+
+{% block title %}Create Album{% endblock %}
 
 {% block content %}
-<h2>Create New Album</h2>
-<form method="post" enctype="multipart/form-data" id="album-form">
-    {% csrf_token %}
-
-    <!-- Album Form -->
-    {{ album_form.as_p }}
-
-    <!-- Tracks -->
-    <h3>Tracks</h3>
-    <div class="form-group">
-        {{ form.position.label_tag }}
-        {{ form.position }}
-        {% if form.position.errors %}
-        <div class="text-danger">
-            {% for error in form.position.errors %}
-            <small>{{ error }}</small>
-            {% endfor %}
+<div class="max-w-lg mx-auto">
+    <h1 class="text-3xl font-bold mb-4">Create New Album</h1>
+    <form method="post" enctype="multipart/form-data" class="space-y-4">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="title" class="block text-sm font-medium text-white">Album Title</label>
+            <input type="text" name="title" id="title"
+                class="mt-1 block w-full rounded-md bg-gray-700 border-gray-600 focus:border-blue-500 focus:ring-blue-500"
+                required>
         </div>
-        {% endif %}
-    </div>
-    <div id="track-forms-container">
-        {{ track_formset.management_form }}
-        {% for form in track_formset %}
-        <div class="track-form">
-            {{ form.as_p }}
-            <button type="button" class="remove-track">Удалить</button>
+        <div class="form-group">
+            <label for="artist" class="block text-sm font-medium text-white">Artist</label>
+            <select name="artist" id="artist"
+                class="mt-1 block w-full rounded-md bg-gray-700 border-gray-600 focus:border-blue-500 focus:ring-blue-500"
+                required>
+                {% for artist in artists %}
+                <option value="{{ artist.id }}">{{ artist.name }}</option>
+                {% endfor %}
+            </select>
         </div>
-        {% endfor %}
-    </div>
-    <button type="button" id="add-track">+ Добавить трек</button>
-
-    <button type="submit">Create Album</button>
-</form>
-
-<!-- Скрытый шаблон для новых форм -->
-<div id="empty-form" style="display:none;">
-    <div class="track-form">
-        {{ track_formset.empty_form.as_p }}
-        <button type="button" class="remove-track">Удалить</button>
-    </div>
+        <div class="form-group">
+            <label for="cover" class="block text-sm font-medium text-white">Album Cover</label>
+            <input type="file" name="cover" id="cover"
+                class="mt-1 block w-full rounded-md bg-gray-700 border-gray-600 focus:border-blue-500 focus:ring-blue-500"
+                required>
+        </div>
+        <div class="form-group">
+            <label for="description" class="block text-sm font-medium text-white">Description</label>
+            <textarea name="description" id="description" rows="4"
+                class="mt-1 block w-full rounded-md bg-gray-700 border-gray-600 focus:border-blue-500 focus:ring-blue-500"></textarea>
+        </div>
+        <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">Create
+            Album</button>
+    </form>
 </div>
-
-<script src="{% static 'js/create_album.js' %}"></script>
-
-{% endblock content %}
+{% endblock %}

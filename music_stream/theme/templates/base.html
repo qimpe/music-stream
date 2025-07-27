@@ -1,0 +1,38 @@
+{% load static tailwind_tags %}
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{% block title %}Music Stream{% endblock %}</title>
+        {% tailwind_css %}
+        <style>
+            html,
+            body {
+                margin: 0;
+                padding: 0;
+                height: 100%;
+                background-color: #0a0a0a;
+                /* Более темный фон для контраста */
+            }
+        </style>
+    </head>
+    <body class="flex bg-neutral-950">
+        <!-- Navbar с внешними отступами -->
+        <div class="ml-3 mt-3 mb-3">
+            {% include "partials/navbar.html" %}
+        </div>
+
+        <!-- Расстояние между плашками -->
+        <div class="w-3"></div>
+
+        <!-- Main с внешними отступами -->
+        <div class="flex-1 mr-3 mt-3 mb-3 min-h-0">
+            <main class="h-full border border-gray-500 shadow-gray-800 bg-zinc-950 rounded-2xl overflow-auto">
+                {% block content %}{% endblock %}
+            </main>
+        </div>
+
+        <script src="{% static 'js/player.js' %}"></script>
+    </body>
+</html>

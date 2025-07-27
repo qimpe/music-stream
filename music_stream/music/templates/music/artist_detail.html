@@ -1,26 +1,28 @@
-{% extends 'base.html' %}
-{% load static %}
+{% extends "base.html" %}
+
+{% block title %}{{ artist.name }}{% endblock %}
+
 {% block content %}
-<img src="{{artist.image.url}}" alt="{{artist}}_image">
-<h4>Исполнитель</h4>
-<h1>{{artist}}</h1>
-{% if artist.bio %}
-<h3>{{artist.bio }}</h3>
-{% endif %}
-<div>
-    {% if releases %}
-    {% for album in releases %}
-    <ul>
-        <li>
-            <a href="{% url 'music:album_detail' album.album.id %}"><img src="{{album.album.cover.url}}"
-                    alt="{{artist_album.album}}_cover"></a>
-        </li>
-    </ul>
-    {% endfor %}
-    {% else %}
-    <h3>У тебя пока нет ни одного релиза. Пора исправляться!</h3>
-    {% endif %}
+<div class="artist-detail">
+    <img src="{{ artist.image.url }}" alt="{{ artist.name }}" class=" object-cover rounded mb-4">
+    <p class="text-gray-400 ml-80 mb-8">Исполнитель</p>
+    <h1 class="text-4xl ml-80 font-bold mb-4">{{ artist.name }}</h1>
+    <h3 class="ml-80">Слушателей за месяц: </h3>
+    <p class="text-gray-400 mb-8">{{ artist.bio }}</p>
+    <h2 class="text-2xl font-bold mb-4">Последние релизы</h2>
+    <div class="albums-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {% for release in releases %}
+        <div class="album-card bg-gray-800 p-4 rounded shadow-lg hover:shadow-xl transition">
+            <img src="{{ album.cover.url }}" alt="{{ album.title }}" class="w-full h-48 object-cover rounded">
+            <h3 class="text-xl mt-2 font-semibold">{{ release}}</h3>
+            <a href="{% url 'music:album_detail' release.id %}" class="text-blue-500 hover:underline">View Album</a>
+        </div>
+        {% endfor %}
+    </div>
+    <div class="artist-manage">
+        <div class="create-album">
+            <a href="{% url 'music:create_album' %}" class="create-album-btn">Выпустить альбом</a>
+        </div>
+    </div>
 </div>
-<a href="{% url 'music:create_album' %}">Создать альбом</a>
-<a href="{% url 'music:create_album' %}">Выпустить Сингл</a>
-{% endblock content %}
+{% endblock %}

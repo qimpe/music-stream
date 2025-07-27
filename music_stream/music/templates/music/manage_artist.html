@@ -1,0 +1,27 @@
+{% extends 'base.html'%}
+
+{% block content %}
+<div class="manage-artist">
+    <img src="{{artist.image.url}}" alt="{{artist}}">
+    <div class="manage-buttons flex flex-col gap-2">
+        <a class="create-album-btn bg-rose-900 p-2 rounded-full hover:bg-rose-500 transition ease-in-out duration-300"
+            href="{% url 'music:create_album' %}">
+            Создать альбом
+        </a>
+        <a class="create-track-btn bg-rose-900 p-2 rounded-full hover:bg-rose-500 transition ease-in-out duration-300"
+            href=" #">
+            Создать Трек
+        </a>
+        <a class="arttist-card-link bg-rose-900 p-2 rounded-full hover:bg-rose-500 transition ease-in-out duration-300"
+            href="{% url 'music:artist_detail' artist_id=artist_id %}">
+            Перейти к карточке
+        </a>
+    </div>
+    <h2>Статистика</h2>
+    <div class="statistics">
+        <div>
+            <p>Слушателей за месяц</p>
+        </div>
+    </div>
+</div>
+{% endblock content %}

@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+
+<section class="featured-artists mb-8">
+    <h2 class="text-2xl font-bold mb-4">Featured Artists</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {% for artist in featured_artists %}
+        <div class="artist-card bg-gray-800 p-4 rounded shadow-lg hover:shadow-xl transition">
+            <img src="{{ artist.image.url }}" alt="{{ artist.name }}" class="w-full h-48 object-cover rounded">
+            <h3 class="text-xl mt-2 font-semibold">{{ artist.name }}</h3>
+            <a href="{% url 'artist_detail' artist.id %}" class="text-blue-500 hover:underline">View Profile</a>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+<section class="new-releases">
+    <h2 class="text-2xl font-bold mb-4">New Releases</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {% for album in new_albums %}
+        <div class="album-card bg-gray-800 p-4 rounded shadow-lg hover:shadow-xl transition">
+            <img src="{{ album.cover.url }}" alt="{{ album.title }}" class="w-full h-48 object-cover rounded">
+            <h3 class="text-xl mt-2 font-semibold">{{ album.title }}</h3>
+            <p class="text-gray-400">{{ album.artist.name }}</p>
+            <a href="{% url 'album_detail' album.id %}" class="text-blue-500 hover:underline">View Album</a>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+{% endblock %}

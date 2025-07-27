@@ -1,28 +1,40 @@
-{% extends 'base.html' %}
-{% load static %}
-{% block content %}
-<div>
-    <h1>Добро пожаловать в профиль, {{user}} !</h1>
-</div>
-<div>
-    {% if not users_artists %}
-    <h2>Не думали стать артистом? Подавай заявку на <a href="{% url 'music:create_artist' %}">создание</a> карточки
-        музыканта и пользуйтесь всеми преимуществами Qimpe
-        Music!</h2>
-    {% else %}
-    {% if users_artists|length == 1 %}
-    <h2>Карточка артиста</h2>
-    {% else %}
-    <h2>Карточки артистов</h2>
-    {% endif %}
-    {% for user_artist in users_artists %}
-    <ul>
-        <li><a href="{% url 'music:artist_detail' user_artist.artist.id %}"><img src="{{ user_artist.artist.image.url}}"
-                    alt="{{user_artist.artist}}"></li></a>
-        <h3>{{user_artist.artist}}</h3>
-        {% endfor %}
-    </ul>
+{% extends "base.html" %}
 
+{% block title %}Profile{% endblock %}
+
+{% block content %}
+<div class="profile-page">
+    <div class="flex items-center mb-8">
+        <img src="{{ user.profile_image.url}}" alt="{{ user.username }}" class="w-24 h-24 rounded-full mr-4">
+        <h1 class="text-3xl font-bold">Welcome, {{ user.username }}</h1>
+    </div>
+    {% if users_artists %}
+    <section class="artists">
+        <h2 class="text-2xl font-bold mb-4">Карточки артистов</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {% for user_artists in users_artists %}
+            <div class="artist-card hover:transition">
+                <a href="{% url 'music:manage_artist' user_artists.artist.id %}">
+                    <img class="rounded-2xl" src="{{user_artists.artist.image.url}}"
+                        alt="{{user_artists.artist}}_image"></a>
+
+            </div>
+            {% endfor %}
+
+    </section>
     {% endif %}
+    <section class="playlists">
+        <h2 class="text-2xl font-bold mb-4">Your Playlists</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {% for playlist in user.playlists.all %}
+            <div class="playlist-card bg-gray-800 p-4 rounded shadow-lg hover:shadow-xl transition">
+                <h3 class="text-xl font-semibold">{{ playlist.name }}</h3>
+                <p class="text-gray-400">{{ playlist.songs.count }} songs</p>
+                <a href="{% url 'playlist_detail' playlist.id %}" class="text-blue-500 hover:underline">View
+                    Playlist</a>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
 </div>
-{% endblock content %}</a>
+{% endblock %}

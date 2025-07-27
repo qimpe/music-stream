@@ -8,13 +8,14 @@ from django.core.exceptions import PermissionDenied
 from django.db.models.query import QuerySet
 from django.http import HttpResponse, JsonResponse
 from django.http.request import HttpRequest
-from django.http.response import HttpResponse, HttpResponseBase, HttpResponseRedirect
+from django.http.response import HttpResponse, HttpResponseBase, HttpResponseNotFound, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DeleteView, DetailView, UpdateView, View
 
 from . import services
 from .forms import AlbumForm, ArtistCreateForm, TrackInAlbumFormSet
+from .mixins import UserManageArtist
 from .models import Album, Artist, Track
 
 
@@ -70,6 +71,17 @@ class ArtistDetailView(DetailView):
         context["artist_albums"] = artist_album_service.fetch_artist_albums(artist_id)
         context["releases"] = artist_service.fetch_all_artist_releases(artist_id)
         return context
+
+
+class ManageArtistView(UserManageArtist, View):
+    template_name = "music/manage_artist.html"
+
+    def get(self, request: HttpRequest, *args: typing.Any, **kwargs: typing.Any) -> HttpResponse:
+        artist_id = self.kwargs.get("artist_id")
+        print(artist_id)
+        if artist_id:
+            return render(request, self.template_name, context={"artist_id": artist_id})  # type: ignore
+        return HttpResponseNotFound()
 
 
 # *Album views
