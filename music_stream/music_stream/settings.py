@@ -10,6 +10,7 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 
 import os
+import sys
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -41,7 +42,6 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "tailwind",
-    "debug_toolbar",
     "minio_storage",
     "django_browser_reload",
     "music",
@@ -53,7 +53,6 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django_browser_reload.middleware.BrowserReloadMiddleware",
-    "debug_toolbar.middleware.DebugToolbarMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -120,6 +119,10 @@ MINIO_STORAGE_MEDIA_USE_PRESIGNED = os.getenv("MINIO_STORAGE_MEDIA_USE_PRESIGNED
 MINIO_STORAGE_USE_HTTPS = False
 MINIO_STORAGE_SECURE = False
 
+FILE_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024  # 5 МБ
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10 МБ
+
+
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
 
@@ -146,6 +149,17 @@ DEBUG_TOOLBAR_CONFIG = {
     "RESULTS_CACHE_SIZE": 100,
     "IS_RUNNING_TESTS": False,
 }
+TESTING = "test" in sys.argv or "PYTEST_VERSION" in os.environ
+
+if not TESTING:
+    INSTALLED_APPS = [
+        *INSTALLED_APPS,
+        "debug_toolbar",
+    ]
+    MIDDLEWARE = [
+        "debug_toolbar.middleware.DebugToolbarMiddleware",
+        *MIDDLEWARE,
+    ]
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/

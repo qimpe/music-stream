@@ -1,8 +1,7 @@
 import factory
 from django.contrib.auth.models import User
 from faker.providers import BaseProvider
-
-from music.models import Artist, UserArtist
+from music.models import Artist
 
 
 class StatusProvider(BaseProvider):
@@ -22,13 +21,6 @@ class ArtistFactory(factory.django.DjangoModelFactory):
     class Meta:  # type: ignore
         model = Artist
 
+    image = factory.django.ImageField(color="red")
     name = factory.Faker("user_name")
     bio = factory.Faker("text")
-
-
-class UsersArtistFactory(factory.django.DjangoModelFactory):
-    class Meta:
-        model = UserArtist
-
-    user = factory.SubFactory(UserFactory)
-    artist = factory.SubFactory(ArtistFactory)

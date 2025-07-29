@@ -1,6 +1,7 @@
 from typing import Any
 
 from django import forms
+from django.core.exceptions import ValidationError
 from django.core.validators import FileExtensionValidator
 from django.forms import inlineformset_factory
 from django_stubs_ext.db.models import TypedModelMeta
@@ -10,6 +11,27 @@ from .models import Album, Artist, Track, TrackInAlbum
 
 class ArtistCreateForm(forms.ModelForm):
     """Форма создания Артиста."""
+
+    name = forms.fields.CharField(required=True)
+    image = forms.ImageField(
+        required=True,
+        validators=[
+            FileExtensionValidator(allowed_extensions=["jpg", "jpeg", "png", "webp"]),
+        ],
+        help_text="Допустимые форматы: JPG, JPEG, PNG, WEBP. Макс. размер: 5 МБ.",
+    )
+
+    def clean_image(self) -> None:
+        image = self.cleaned_data.get("image")
+        if image:
+            max_height = 2000
+            max_width = 2000
+            if image.image.width > max_width or image.image.height > max_height:
+                msg = "Превышен максимальны размер фото"
+                raise ValidationError(msg)
+            return image
+        msg = "Фото не загружено"
+        raise ValidationError(msg)
 
     class Meta(TypedModelMeta):
         model = Artist

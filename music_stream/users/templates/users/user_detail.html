@@ -50,7 +50,7 @@
             {% for user_artists in users_artists %}
             <div
                 class="artist-card group relative overflow-hidden rounded-2xl transition-all duration-300 hover:shadow-xl hover:shadow-rose-900/30">
-                <a href="{% url 'music:manage_artist' user_artists.artist.id %}">
+                <a href="{% url 'music:manage_artist' user_artist.id %}">
                     <img class="w-full h-48 object-cover rounded-2xl group-hover:scale-105 transition-transform duration-300"
                         src="{{ user_artists.artist.image.url }}" alt="{{ user_artists.artist }}">
                     <div

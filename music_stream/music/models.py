@@ -37,6 +37,7 @@ class Music(models.Model):
 class Artist(models.Model):
     name = models.CharField(null=False, blank=False, max_length=128, unique=True, verbose_name="Имя")
     slug = models.SlugField(null=False, max_length=128, unique=True)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     image = models.ImageField(upload_to="artists_images/", verbose_name="Фото")
     bio = models.TextField(default="", blank=True, verbose_name="Биография")
     status = models.CharField(
@@ -44,8 +45,8 @@ class Artist(models.Model):
     )
 
     balance = models.IntegerField(default=0, null=False, verbose_name="Баланс")
+    created_at = models.DateTimeField(auto_now_add=True)
 
-    # created_at = models.DateTimeField(auto_now_add=True)
     class Meta(TypedModelMeta):
         indexes = [
             models.Index(fields=["name"], name="idx_artist_name"),
@@ -101,7 +102,6 @@ class Album(Music):
 
 
 class Track(Music):
-    artist = models.ForeignKey(Artist, on_delete=models.CASCADE)  # передалать на many to many
     cover = models.ImageField(upload_to="music_covers/", verbose_name="Обложка")
     audio_file = models.FileField(upload_to="tracks/")
     release_date = models.DateTimeField(null=True, verbose_name="Дата релиза")
@@ -113,7 +113,6 @@ class Track(Music):
         indexes = [
             models.Index(fields=["title"], name="idx_track_title"),
             models.Index(fields=["slug"], name="idx_track_slug"),
-            models.Index(fields=["artist"], name="idx_track_artist"),
         ]
 
     def save(self, *args: typing.Any, **kwargs: typing.Any) -> None:
@@ -136,17 +135,6 @@ class Playlist(Music):
 
 
 # Связные таблица
-
-
-class UserArtist(models.Model):
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
-    artist = models.ForeignKey(Artist, on_delete=models.CASCADE)
-
-    class Meta(TypedModelMeta):
-        unique_together = ("artist", "user")
-
-    def __str__(self) -> str:
-        return f"User {self.user} manage Artist {self.artist}"
 
 
 class AlbumArtist(models.Model):

@@ -1,8 +1,7 @@
 import typing
 
 import mutagen
-from django.contrib.auth.models import User
-from django.core.exceptions import BadRequest, PermissionDenied
+from django.core.exceptions import PermissionDenied
 from django.core.files.storage import default_storage
 from django.db import transaction
 from django.db.models import QuerySet, Sum
@@ -12,6 +11,7 @@ from .forms import AlbumForm, ArtistCreateForm
 from .models import (
     Album,
     AlbumArtist,
+    AlbumGenres,
     Artist,
     ArtistTrack,
     Genre,
@@ -19,7 +19,6 @@ from .models import (
     Track,
     TrackInAlbum,
     TrackMetadata,
-    UserArtist,
 )
 
 
@@ -29,9 +28,9 @@ class ArtistService:
     def create_artist(self, request: HttpRequest, form: ArtistCreateForm) -> Artist:
         """Создает артиста или вызывает исключение при ошибке."""
         with transaction.atomic():
-            artist = form.save()
-            user_artist_service = UserArtistService()
-            user_artist_service.create_user_artist(request.user, artist)  # type: ignore
+            form.full_clean()
+            artist = form.save(commit=False)
+            artist.user = request.user
             return artist
 
     def fetch_artist_queryset_by_id(self, artist_id: int) -> QuerySet[Artist]:
@@ -48,43 +47,40 @@ class ArtistService:
         # chain(albums.order_by("release_date"), tracks.order_by("release_date"))
         return albums
 
-
-class UserArtistService:
-    """Сервис для модели: UserArtist."""
-
-    def create_user_artist(self, user: User, artist: Artist) -> UserArtist:
-        """Привязывает к пользователю артиста и возвращает объект."""
-        if UserArtist.objects.filter(user=user, artist=artist).exists():
-            msg = "Artist already in album"
-            raise BadRequest(msg)
-        return UserArtist.objects.create(user=user, artist=artist)
-
-    def fetch_artist_by_user_id(self, user_id: int) -> UserArtist | None:
-        """Получает артиста по id пользователя."""
-        return (
-            UserArtist.objects.select_related("artist").filter(user_id=user_id).first()
-        )  #! проблема в том что у пользователя может быть больше 1 артиста
+    def fetch_artist_by_user_id(self, user_id: int) -> Artist:
+        """Возвращает артиста по id пользователя."""
+        return Artist.objects.get(user_id=user_id)
 
 
 class AlbumService:
     """Сервис для модели: Album."""
 
-    #! у несольких треков может быть 1 позиция
     def create_album(self, user_id: int, album_form: AlbumForm, track_formset) -> Album:
         """Создает альбом и треки которые в него входят."""
-        artist_service = UserArtistService()
+        artist_service = ArtistService()
         album_artist = AlbumArtistService()
         track_service = TrackService()
         track_in_album = TrackInAlbumService()
+        genre_album_service = GenreAlbumService()
+        genre_service = GenreService()
+        GenreTrackService()
         with transaction.atomic():
-            users_artist = artist_service.fetch_artist_by_user_id(user_id)
-            if not users_artist:
-                msg = "Артист не найден для пользователя"
+            artist = artist_service.fetch_artist_by_user_id(user_id)
+            if not artist:
+                msg = "Артист не найден для этого пользователя"
                 raise ValueError(msg)
-            artist = users_artist.artist
             album = album_form.save()
-            print(album.genre)
-            tracks_with_positions = track_service.create_track_from_formset(track_formset, artist)
+            album_genre_title = album_form.data.get("genre")
+
+            if not album_genre_title:
+                return None
+            genre = genre_service.fetch_genre_by_title(album_genre_title)
+            if genre:
+                genre_album_service.link_genre_with_album(album.id, genre.id)
+            print(track_formset.data)
+            # track_genre_service.create_tracks_genres(track_list)
+
+            tracks_with_positions = track_service.create_track_from_formset(track_formset)
             tracks_data = [track for track, position in tracks_with_positions]
             tracks = Track.objects.bulk_create(tracks_data)
 
@@ -93,11 +89,17 @@ class AlbumService:
             track_service.create_metadata_for_tracks_list(tracks)
             return album
 
+    def update_album_status_on_delete(self, album_id: int) -> None:
+        """Обновляет статус альбома на *deleted* и статус всех треков которые в него входили."""
+        new_status = "deleted"
+        with transaction.atomic():
+            Track.objects.filter(trackinalbum__album_id=album_id).update(status=new_status)
+            Album.objects.filter(id=album_id).update(status=new_status)
+
     def delete_album(self, album_id: int) -> None:
         """Удаляет альбом и все треки которые в него входили."""
         with transaction.atomic():
-            tracks = Track.objects.filter(trackinalbum__album_id=album_id)
-            tracks.delete()
+            Track.objects.filter(trackinalbum__album_id=album_id).delete()
             Album.objects.filter(id=album_id).delete()
 
     def fetch_album_by_id(self, album_id: int) -> Album:
@@ -174,7 +176,7 @@ class TrackService:
         else:
             return metadata
 
-    def create_track_from_formset(self, track_formset, artist: Artist) -> list[tuple[Track, int]]:
+    def create_track_from_formset(self, track_formset) -> list[tuple[Track, int]]:
         """Создает список треков их позиций в альбоме, данные которых лежат в форме при создании альбома."""
         return [
             (
@@ -184,7 +186,6 @@ class TrackService:
                         "is_explicit", False
                     ),  # если is_explicit != True, то передает False по дефолту
                     audio_file=form.cleaned_data.get("audio_file"),
-                    artist=artist,
                 ),
                 form.cleaned_data["position"],
             )
@@ -235,5 +236,25 @@ class ArtistTrackService:
 class GenreService:
     """Сервис для модели: Genre."""
 
-    def fetch_all_genres(self) -> QuerySet[Genre]:
+    def fetch_all_genres_titles(self) -> QuerySet[Genre]:
+        """Возвращает название всех жанров."""
         return Genre.objects.all().only("title")
+
+    def fetch_genre_by_title(self, title: str) -> Genre | None:
+        """Возвращает объект трека оп его названию."""
+        return Genre.objects.filter(title=title).first()
+
+
+class GenreAlbumService:
+    """Сервис для модели: GenreAlbum."""
+
+    def link_genre_with_album(self, album_id: int, genre_id: int) -> AlbumGenres:
+        """Связывает альбом и жанр в отдельную модель."""
+        return AlbumGenres.objects.create(album_id=album_id, genre_id=genre_id)
+
+
+class GenreTrackService:
+    """Сервис для модели: GenreTrack."""
+
+    def link_genre_with_tracks(self: list) -> None:
+        """Связывает трек и жанр в отдельную модель."""

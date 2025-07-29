@@ -7,11 +7,13 @@ from . import services
 
 
 class UserManageArtist(LoginRequiredMixin):
+    """Проверяет обладает ли пользователь правами на данного артиста."""
+
     def dispatch(self, request: HttpRequest, *args: typing.Any, **kwargs: typing.Any) -> HttpResponseBase:
-        service = services.UserArtistService()
-        artist = service.fetch_artist_by_user_id(request.user.id)  # type: ignore
-        print(request.user)
-        print(artist.user)
-        if request.user != artist.user or artist.user is None:  # type: ignore
-            return self.handle_no_permission()
-        return super().dispatch(request, *args, **kwargs)
+        service = services.ArtistService()
+        artist_id = kwargs.get("artist_id")
+        if artist_id:
+            artist = service.fetch_artist_by_user_id(request.user.id)  # type: ignore
+            if artist_id == artist.id:
+                return super().dispatch(request, *args, **kwargs)
+        return self.handle_no_permission()

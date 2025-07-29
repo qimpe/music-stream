@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from django.db.models.query import QuerySet
-from music.models import UserArtist
+from music.models import Artist
+from music.services import ArtistService
 
 
 def fetch_user_by_id(user_id: int) -> QuerySet[User]:
@@ -8,6 +9,7 @@ def fetch_user_by_id(user_id: int) -> QuerySet[User]:
     return User.objects.filter(id=user_id)
 
 
-def fetch_users_artists_by_user_id(user_id: int) -> QuerySet[UserArtist]:
+def fetch_user_artist_by_user_id(user_id: int) -> Artist:
     """Возвращает всех артистов которыми управляет пользователь."""
-    return UserArtist.objects.select_related("artist").filter(user_id=user_id)
+    service = ArtistService()
+    return service.fetch_artist_by_user_id(user_id)

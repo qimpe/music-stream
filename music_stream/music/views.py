@@ -10,7 +10,7 @@ from django.http import HttpResponse, JsonResponse
 from django.http.request import HttpRequest
 from django.http.response import HttpResponseBase, HttpResponseNotFound, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.views.generic import CreateView, DeleteView, DetailView, UpdateView, View
 
 from . import services
@@ -30,28 +30,22 @@ class IndexView(View):
 
 
 # *Artist views
-
-
 class ArtistCreateView(LoginRequiredMixin, CreateView):
-    """Представление создания Артиста."""
+    """Представление создания карточки артиста."""
 
     model = Artist
     form_class = ArtistCreateForm
-    success_url = "music:index"
+    success_url = "music:artist_detail"
     template_name = "music/create_artist.html"
 
     def form_valid(self, form: ArtistCreateForm) -> HttpResponse:
         artist_service = services.ArtistService()
-        try:
-            artist_service.create_artist(self.request, form)
-            messages.success(self.request, "карточка успешно создана")
-            return redirect(self.get_success_url())
-        except Exception as e:
-            messages.error(self.request, f"Ошибка при создании артиста: {e}")
-            return self.form_invalid(form)
+        self.object = artist_service.create_artist(self.request, form)
+        messages.success(self.request, "Карточка успешно создана")
+        return redirect(self.get_success_url())
 
     def get_success_url(self) -> str:
-        return reverse_lazy(self.success_url)
+        return reverse(self.success_url, kwargs={"artist_id": self.object.id})  # type: ignore
 
 
 class ArtistDetailView(DetailView):
@@ -78,53 +72,61 @@ class ArtistDetailView(DetailView):
 
 
 class ManageArtistView(UserManageArtist, View):
+    """Страница управления артистом доступная только пользователю,который им обладает."""
+
     template_name = "music/manage_artist.html"
 
     def get(self, request: HttpRequest, *args: typing.Any, **kwargs: typing.Any) -> HttpResponse:
         artist_id = self.kwargs.get("artist_id")
-        print(artist_id)
         if artist_id:
             return render(request, self.template_name, context={"artist_id": artist_id})  # type: ignore
         return HttpResponseNotFound()
 
 
 # *Album views
-class AlbumCreateView(UserManageArtist, View):
+class AlbumCreateView(LoginRequiredMixin, CreateView):
     """Представление создание альбома и треков которые в него входят."""
 
     model = Album
     form_class = AlbumForm
-    success_url = reverse_lazy("music:index")
     template_name = "music/create_album.html"
 
-    def get(self, request: HttpRequest, *args: typing.Any, **kwargs: typing.Any) -> HttpResponse:
-        genre_service = services.GenreService()
-        self.genres = genre_service.fetch_all_genres()
-        context = {}
-        context["genres"] = self.genres
-        context["album_form"] = AlbumForm()
-        context["track_formset"] = TrackInAlbumFormSet(prefix="tracks")
-        return render(request, self.template_name, context)  # pyright: ignore[reportArgumentType]
+    def get_context_data(self, **kwargs: typing.Any) -> dict[str, typing.Any]:
+        context = super().get_context_data(**kwargs)
+        if "track_formset" in kwargs:
+            context["track_formset"] = kwargs["track_formset"]
+        else:
+            context["track_formset"] = TrackInAlbumFormSet(prefix="tracks")
 
-    def post(self, request: HttpRequest, *args: typing.Any, **kwargs: typing.Any) -> HttpResponse:
-        album_form = AlbumForm(request.POST, request.FILES)
+        context["genres"] = services.GenreService().fetch_all_genres_titles()
+        return context
+
+    def post(self, request: HttpRequest, *args: reverse_lazy, **kwargs: reverse_lazy) -> HttpResponse:  # type: ignore
+        self.object = None
+        album_form = self.get_form()
         track_formset = TrackInAlbumFormSet(request.POST, request.FILES, prefix="tracks")
         if album_form.is_valid() and track_formset.is_valid():
-            album_service = services.AlbumService()
-            album_service.create_album(request.user.id, album_form, track_formset)  # type: ignore
-            return redirect(self.success_url)  # type: ignore
-        print(11111111111111111111111)
-        print("Album data:", request.POST)
-        print("Files:", request.FILES.keys())
+            return self.form_valid(album_form, track_formset)
+        return self.form_invalid(album_form, track_formset)
+
+    def form_valid(self, form: AlbumForm, track_formset) -> HttpResponse:  # type: ignore
+        album_service = services.AlbumService()
+        self.object = album_service.create_album(self.request.user.id, form, track_formset)  # type: ignore
+        return super().form_valid(form)
+
+    def form_invalid(self, album_form: AlbumForm, track_formset) -> HttpResponse:  # type: ignore
         return render(
-            request,
-            self.template_name,
+            self.request,
+            self.template_name,  # type: ignore
             {
-                "genres": services.GenreService().fetch_all_genres(),
+                "genres": services.GenreService().fetch_all_genres_titles(),
                 "album_form": album_form,
                 "track_formset": track_formset,
             },
         )
+
+    def get_success_url(self) -> str:
+        return reverse("music:album_detail", kwargs={"album_id": self.object.id})
 
 
 class AlbumDeleteView(LoginRequiredMixin, DeleteView):
@@ -151,19 +153,18 @@ class AlbumUpdateView(LoginRequiredMixin, UpdateView):
     template_name = "music/update_album.html"
     success_url = "music:index"
 
-    def get_object(self, queryset: QuerySet | None = ...) -> typing.Any:  # pyright: ignore[reportArgumentType]
-        album_id = self.kwargs.get(self.pk_url_kwarg)
-        album_service = services.AlbumService()
-        return album_service.fetch_album_for_update(album_id)
-
     def dispatch(self, request: HttpRequest, *args, **kwargs) -> HttpResponseRedirect | HttpResponseBase:
         try:
             return super().dispatch(request, *args, **kwargs)
         except (Album.DoesNotExist, PermissionDenied) as e:
             msg = "Альбом не найден" if isinstance(e, Album.DoesNotExist) else str(e)
-
             messages.error(request, msg)
             return redirect(self.get_success_url())
+
+    def get_object(self, queryset: QuerySet | None = ...) -> Album:  # pyright: ignore[reportArgumentType]
+        album_id = self.kwargs.get(self.pk_url_kwarg)
+        album_service = services.AlbumService()
+        return album_service.fetch_album_for_update(album_id)
 
 
 class AlbumDetailView(DetailView):
@@ -179,7 +180,6 @@ class AlbumDetailView(DetailView):
     def get_context_data(self, **kwargs: typing.Any) -> dict[str, typing.Any]:
         album_tracks_service = services.TrackInAlbumService()
         context = super().get_context_data(**kwargs)
-
         tracks = album_tracks_service.fetch_tracks_in_album(self.object.id)
         context["album_length"] = album_tracks_service.count_album_length_in_minutes(tracks)
         context["album_tracks"] = tracks

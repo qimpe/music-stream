@@ -1,9 +1,301 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% load static %}
+{% block title %}Update Album - {{ album.title }}{% endblock %}
+
 {% block content %}
-<form method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <input type="submit" value="Update">
-</form>
-{% endblock content %}
+<div class="max-w-4xl mx-auto p-6">
+    <div class="mb-10">
+        <h1 class="text-4xl font-bold text-white mb-2">Update Album</h1>
+        <p class="text-gray-400">Edit the details of your album below</p>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" id="album-form" class="space-y-8">
+        {% csrf_token %}
+
+        <!-- Album Details Section -->
+        <div class="bg-zinc-900 p-6 rounded-2xl border border-gray-700 shadow-lg">
+            <h2 class="text-2xl font-semibold text-white mb-6 pb-2 border-b border-gray-700">Album Details</h2>
+
+            <div class="flex flex-col md:flex-row gap-6">
+                <!-- Left Column - Text Fields -->
+                <div class="flex-1 space-y-6">
+                    <!-- Title Field -->
+                    <div>
+                        <label for="{{ album_form.title.id_for_label }}" class="block text-gray-300 mb-2">Title</label>
+                        <input type="text" name="{{ album_form.title.name }}" id="id_title"
+                            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-rose-600 focus:border-transparent outline-none transition"
+                            placeholder="Album title" value="{{ album_form.title.value|default:'' }}">
+                        {% for error in album_form.title.errors %}
+                        <p class="text-red-500 text-sm mt-1">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Release Date Field -->
+                    <div>
+                        <label for="{{ album_form.release_date.id_for_label }}" class="block text-gray-300 mb-2">Release Date</label>
+                        <input type="date" name="{{ album_form.release_date.name }}" id="id_release_date"
+                            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-rose-600 focus:border-transparent outline-none transition"
+                            value="{{ album_form.release_date.value|date:'Y-m-d' }}">
+                        {% for error in album_form.release_date.errors %}
+                        <p class="text-red-500 text-sm mt-1">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Explicit Field -->
+                    <div class="flex items-center">
+                        <label class="flex items-center cursor-pointer">
+                            <input type="checkbox" name="{{ album_form.is_explicit.name }}"
+                                id="{{ album_form.is_explicit.id_for_label }}"
+                                class="hidden peer" {% if album_form.is_explicit.value %}checked{% endif %}>
+                            <div
+                                class="relative flex items-center justify-center w-6 h-6 bg-gray-800 border border-gray-600 rounded-md peer-checked:bg-rose-700 peer-checked:border-rose-600 transition-all">
+                                <svg class="w-4 h-4 text-white opacity-0 peer-checked:opacity-100 transition-opacity"
+                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                        d="M5 13l4 4L19 7" />
+                                </svg>
+                            </div>
+                            <span class="ml-3 text-gray-300">Explicit (18+)</span>
+                        </label>
+                        {% for error in album_form.is_explicit.errors %}
+                        <p class="text-red-500 text-sm mt-1">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Genre Field -->
+                    <div>
+                        <label for="{{ album_form.genre.id_for_label }}" class="block text-gray-300 mb-2">Genre</label>
+                        <select name="{{ album_form.genre.name }}" id="id_genre"
+                            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-rose-600 focus:border-transparent outline-none appearance-none bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiI2Yzc0ODAiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cG9seWxpbmUgcG9pbnRzPSI2IDkgMTIgMTUgMTggOSI+PC9wb2x5bGluZT48L3N2Zz4=')] bg-no-repeat bg-[center_right_1rem]">
+                            <option value="">Select album genre</option>
+                            {% for genre in genres %}
+                            <option value="{{ genre.title }}" {% if album_form.genre.value == genre.title %}selected{% endif %}>
+                                {{ genre.title }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        {% for error in album_form.genre.errors %}
+                        <p class="text-red-500 text-sm mt-1">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Right Column - Cover Image -->
+                <div class="flex flex-col items-center">
+                    <label class="block text-gray-300 mb-2">Cover Image</label>
+                    <div id="cover-preview"
+                        class="w-48 h-48 bg-gray-800 border-2 border-dashed border-gray-600 rounded-xl flex items-center justify-center mb-4 overflow-hidden">
+                        {% if album.cover %}
+                            <img src="{{ album.cover.url }}" alt="Current cover" class="w-full h-full object-cover">
+                        {% else %}
+                            <svg class="w-12 h-12 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
+                                </path>
+                            </svg>
+                        {% endif %}
+                    </div>
+                    <input type="file" name="{{ album_form.cover.name }}" id="id_cover" class="hidden" accept="image/*">
+                    <label for="id_cover"
+                        class="cursor-pointer bg-rose-700 hover:bg-rose-600 text-white py-2 px-4 rounded-lg transition inline-block">
+                        Change Cover
+                    </label>
+                    {% for error in album_form.cover.errors %}
+                    <p class="text-red-500 text-sm mt-1">{{ error }}</p>
+                    {% endfor %}
+                    <p class="text-sm text-gray-500 mt-2">JPG or PNG, max 5MB</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tracks Section -->
+        <div class="bg-zinc-900 p-6 rounded-2xl border border-gray-700 shadow-lg">
+            <div class="flex justify-between items-center mb-6 pb-2 border-b border-gray-700">
+                <h2 class="text-2xl font-semibold text-white">Tracks</h2>
+                <button type="button" id="add-track"
+                    class="flex items-center bg-rose-700 hover:bg-rose-600 text-white py-2 px-4 rounded-lg transition">
+                    <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    Add Track
+                </button>
+            </div>
+
+            <div id="track-forms-container" class="space-y-6">
+                {{ track_formset.management_form }}
+                {% for form in track_formset %}
+                <div class="track-form bg-gray-800 p-5 rounded-xl border border-gray-700 relative group">
+                    <button type="button"
+                        class="remove-track absolute top-3 right-3 flex items-center justify-center w-8 h-8 bg-gray-700 hover:bg-gray-600 rounded-lg text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+                        <!-- Position Field -->
+                        <div class="md:col-span-1">
+                            <label class="block text-gray-300 mb-2">#</label>
+                            <div
+                                class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white text-center flex items-center justify-center">
+                                <span class="track-position">{{ forloop.counter }}</span>
+                                <input type="hidden" name="{{ form.position.html_name }}"
+                                    value="{{ form.position.value|default:forloop.counter }}" class="position-field">
+                            </div>
+                            {% for error in form.position.errors %}
+                            <p class="text-red-500 text-sm mt-1">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Title Field -->
+                        <div class="md:col-span-4">
+                            <label class="block text-gray-300 mb-2">Title</label>
+                            <input type="text" name="{{ form.track_title.html_name }}"
+                                value="{{ form.track_title.value|default:'' }}"
+                                class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:ring-1 focus:ring-rose-600 outline-none"
+                                placeholder="Track title">
+                            {% for error in form.track_title.errors %}
+                            <p class="text-red-500 text-sm mt-1">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Genre Field for Track -->
+                        <div class="md:col-span-3">
+                            <label class="block text-gray-300 mb-2">Genre</label>
+                            <select name="{{ form.genre.html_name }}"
+                                class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white appearance-none bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiI2Yzc0ODAiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cG9seWxpbmUgcG9pbnRzPSI2IDkgMTIgMTUgMTggOSI+PC9wb2x5bGluZT48L3N2Zz4=')] bg-no-repeat bg-[center_right_0.5rem]">
+                                <option value="">Select track genre</option>
+                                {% for genre in genres %}
+                                <option value="{{ genre.title }}" {% if form.genre.value == genre.title %}selected{% endif %}>
+                                    {{ genre.title }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            {% for error in form.genre.errors %}
+                            <p class="text-red-500 text-sm mt-1">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Audio File Field -->
+                        <div class="md:col-span-4">
+                            <label class="block text-gray-300 mb-2">Audio File</label>
+                            <div class="relative">
+                                <input type="file" name="{{ form.audio_file.html_name }}"
+                                    class="audio-file-input absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                    accept="audio/*">
+                                <div
+                                    class="audio-file-display w-full text-sm text-gray-400 truncate py-2 px-4 bg-gray-700 border border-gray-600 rounded-lg flex items-center">
+                                    <svg class="w-5 h-5 mr-2 text-rose-600" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3">
+                                        </path>
+                                    </svg>
+                                    {% if form.instance.audio_file %}
+                                        <span class="file-name">{{ form.instance.audio_file.name|truncatechars:20 }}</span>
+                                    {% else %}
+                                        <span class="file-name">Select audio file</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% for error in form.audio_file.errors %}
+                            <p class="text-red-500 text-sm mt-1">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Hidden Fields - КРИТИЧЕСКИ ВАЖНО! -->
+                        {% for hidden in form.hidden_fields %}
+                            {{ hidden }}
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex justify-end space-x-4">
+            <a href="{% url 'music:album_detail' album.id %}" 
+               class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition">
+                Cancel
+            </a>
+            <button type="submit"
+                class="bg-rose-700 hover:bg-rose-600 text-white font-bold py-3 px-8 rounded-lg text-lg transition transform hover:scale-[1.02]">
+                Update Album
+            </button>
+        </div>
+    </form>
+
+    <!-- Empty Form Template -->
+    <div id="empty-form" style="display:none;">
+        <div class="track-form bg-gray-800 p-5 rounded-xl border border-gray-700 relative group">
+            <button type="button"
+                class="remove-track absolute top-3 right-3 flex items-center justify-center w-8 h-8 bg-gray-700 hover:bg-gray-600 rounded-lg text-gray-300">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+                <!-- Position Field -->
+                <div class="md:col-span-1">
+                    <label class="block text-gray-300 mb-2">#</label>
+                    <div
+                        class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white text-center flex items-center justify-center">
+                        <span class="track-position">__position__</span>
+                        <input type="hidden" name="tracks-__prefix__-position" value="__position__" class="position-field">
+                    </div>
+                </div>
+
+                <!-- Title Field -->
+                <div class="md:col-span-4">
+                    <label class="block text-gray-300 mb-2">Title</label>
+                    <input type="text" name="tracks-__prefix__-track_title"
+                        class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:ring-1 focus:ring-rose-600 outline-none"
+                        placeholder="Track title">
+                </div>
+
+                <!-- Genre Field for Track -->
+                <div class="md:col-span-3">
+                    <label class="block text-gray-300 mb-2">Genre</label>
+                    <select name="tracks-__prefix__-genre"
+                        class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white appearance-none bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI4IiBmaWxsPSJub25lIiBzdHJva2U9IiI2Yzc0ODAiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cG9seWxpbmUgcG9pbnRzPSI2IDkgMTIgMTUgMTggOSI+PC9wb2x5bGluZT48L3N2Zz4=')] bg-no-repeat bg-[center_right_0.5rem]">
+                        <option value="">Select track genre</option>
+                        {% for genre in genres %}
+                        <option value="{{ genre.title }}">{{ genre.title }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Audio File Field -->
+                <div class="md:col-span-4">
+                    <label class="block text-gray-300 mb-2">Audio File</label>
+                    <div class="relative">
+                        <input type="file" name="tracks-__prefix__-audio_file"
+                            class="audio-file-input absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                            accept="audio/*">
+                        <div
+                            class="audio-file-display w-full text-sm text-gray-400 truncate py-2 px-4 bg-gray-700 border border-gray-600 rounded-lg flex items-center">
+                            <svg class="w-5 h-5 mr-2 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3">
+                                </path>
+                            </svg>
+                            <span class="file-name">Select audio file</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hidden Fields -->
+                {{ track_formset.empty_form.id }}
+                {{ track_formset.empty_form.DELETE }}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{% static 'js/create_album.js' %}"></script>
+<script src="{% static 'js/update_album.js' %}"></script>
+{% endblock %}

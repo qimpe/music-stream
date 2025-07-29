@@ -24,6 +24,7 @@ dependencies = [
     "pytest-django>=4.11.1",
     "pytest-mock>=3.14.1",
     "python-dotenv>=1.1.1",
+    "vulture>=2.14",
 ]
 
 
@@ -34,7 +35,7 @@ line-length = 120
 cache-dir = "/tmp/ruff-cache/"
 exclude = [
     "**migrations/",   
-    "tests/",          
+    "**tests/",          
     "**/__pycache__/", 
     ".venv/",
     "**.mypy_cache",              
