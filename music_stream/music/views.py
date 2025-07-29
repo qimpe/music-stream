@@ -112,6 +112,7 @@ class AlbumCreateView(LoginRequiredMixin, CreateView):
     def form_valid(self, form: AlbumForm, track_formset) -> HttpResponse:  # type: ignore
         album_service = services.AlbumService()
         self.object = album_service.create_album(self.request.user.id, form, track_formset)  # type: ignore
+        messages.success(self.request, "Альбом создан и отправлен на модерацию")
         return super().form_valid(form)
 
     def form_invalid(self, album_form: AlbumForm, track_formset) -> HttpResponse:  # type: ignore

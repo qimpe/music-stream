@@ -1,5 +1,5 @@
 
-FROM nginx:latest
+FROM nginx:stable-perl
 
 RUN rm /etc/nginx/conf.d/default.conf
 

@@ -105,7 +105,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for track in album.tracks.all %}
+                    {% for track in album_tracks %}
                     <tr class="border-b border-gray-800 hover:bg-gray-800/50 transition-colors">
                         <td class="py-4">{{ forloop.counter }}</td>
                         <td class="py-4 font-medium">{{ track.title }}</td>
