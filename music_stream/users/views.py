@@ -2,12 +2,28 @@ import typing
 
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.models import User
-from django.views.generic import DetailView
+from django.contrib.auth.views import LoginView, LogoutView
+from django.views.generic import CreateView, DetailView
 
 from . import services
+from .forms import SignInForm, SignUpForm
 
 
-# Create your views here.
+class SignUpView(CreateView):
+    form_class = SignUpForm
+    template_name = "users/sign_up.html"
+
+
+class SignInView(LoginView):
+    form_class = SignInForm
+    template_name = "users/sign_in.html"
+    redirect_authenticated_user = True
+
+
+class SignOutView(LogoutView):
+    pass
+
+
 class ProfileDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     """Представление профиля пользователя."""
 
@@ -18,7 +34,7 @@ class ProfileDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
 
     def test_func(self) -> bool | None:
         """Проверка является ли пользователь владельцем аккаунта."""
-        if self.request.user.id == self.kwargs.get("user_id"):  # type: ignore
+        if self.request.user.pk == self.kwargs.get("user_id"):
             return True
         return None
 

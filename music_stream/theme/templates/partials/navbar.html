@@ -35,19 +35,20 @@
             {% endif %}
 
             <div class="min-w-0">
-                <p class="font-medium truncate">{{ user.username }}</p>
-                <a href="#" class="text-sm text-gray-400 hover:text-white block truncate">
-                    Выйти
-                </a>
+                <form action="{% url 'users:sign_out' %}" method="post">
+                    {% csrf_token %}
+                    <p class="font-medium truncate">{{ user.username }}</p>
+                    <button class="text-sm text-gray-400 hover:text-white block truncate" type="submit">Выйти</button>
+                </form>
             </div>
         </div>
         {% else %}
         <div class="flex flex-col space-y-2">
-            <a href="#"
+            <a href="{% url 'users:sign_in' %}"
                 class="block w-full max-w-fit px-3 py-2 text-white hover:bg-rose-500 transition rounded-2xl ease-out duration-300">
                 Войти
             </a>
-            <a href="#"
+            <a href="{% url 'users:sign_up' %}"
                 class="block w-full max-w-fit px-3 py-2 text-white hover:bg-rose-500 transition rounded-2xl ease-out duration-300">
                 Регистрация
             </a>

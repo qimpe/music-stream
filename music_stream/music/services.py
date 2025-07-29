@@ -31,6 +31,7 @@ class ArtistService:
             form.full_clean()
             artist = form.save(commit=False)
             artist.user = request.user
+            artist.save()
             return artist
 
     def fetch_artist_queryset_by_id(self, artist_id: int) -> QuerySet[Artist]:
@@ -42,14 +43,17 @@ class ArtistService:
         album_service = AlbumArtistService()
         artist_track_service = ArtistTrackService()
         albums = album_service.fetch_artist_albums(artist_id)
-        print(albums)
         artist_track_service.fetch_artist_tracks(artist_id)
         # chain(albums.order_by("release_date"), tracks.order_by("release_date"))
         return albums
 
-    def fetch_artist_by_user_id(self, user_id: int) -> Artist:
-        """Возвращает артиста по id пользователя."""
-        return Artist.objects.get(user_id=user_id)
+    def fetch_artist_by_user_id(self, user_id: int) -> Artist | None:
+        """Возвращает артиста по id пользователя или возвращает None."""
+        return Artist.objects.filter(user_id=user_id).first()
+
+    def is_user_has_artist(self, user_id: int) -> bool:
+        """проверяет есть ли у пользователя артист."""
+        return Artist.objects.filter(user_id=user_id).exists()
 
 
 class AlbumService:

@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Sign Up{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center bg-zinc-950 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8 bg-zinc-950 p-10 rounded-2xl border border-gray-700 shadow-xl">
+        <div>
+            <img class="mx-auto h-24 w-auto" src="{% static 'logo.svg' %}" alt="MusicStream">
+            <h2 class="mt-6 text-center text-3xl font-extrabold text-white">
+                Create a new account
+            </h2>
+            <p class="mt-2 text-center text-sm text-gray-400">
+                Or
+                <a href="{% url 'users:sign_in' %}" class="font-medium text-rose-600 hover:text-rose-500">
+                    sign in to your account
+                </a>
+            </p>
+        </div>
+
+        {% if form.errors %}
+        <div class="bg-red-800/20 border border-red-700 rounded-lg p-4 text-red-300">
+            <p>Please correct the errors below:</p>
+            <ul class="mt-1 list-disc list-inside">
+                {% for field, errors in form.errors.items %}
+                {% for error in errors %}
+                <li>{{ error }}</li>
+                {% endfor %}
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        <form class="mt-8 space-y-6" method="post" action="{% url 'users:sign_up' %}">
+            {% csrf_token %}
+            <div class="rounded-md shadow-sm -space-y-px">
+                <div>
+                    <label for="username" class="sr-only">Username</label>
+                    <input id="username" name="username" type="text" autocomplete="username" required
+                        class="appearance-none rounded-t-lg relative block w-full px-4 py-3 bg-gray-800 border border-gray-700 placeholder-gray-500 text-white focus:outline-none focus:ring-2 focus:ring-rose-600 focus:border-transparent focus:z-10 sm:text-sm"
+                        placeholder="Username" value="{{ form.username.value|default:'' }}">
+                </div>
+                <div>
+                    <label for="email" class="sr-only">Email address</label>
+                    <input id="email" name="email" type="email" autocomplete="email" required
+                        class="appearance-none relative block w-full px-4 py-3 bg-gray-800 border border-gray-700 placeholder-gray-500 text-white focus:outline-none focus:ring-2 focus:ring-rose-600 focus:border-transparent focus:z-10 sm:text-sm"
+                        placeholder="Email address" value="{{ form.email.value|default:'' }}">
+                </div>
+                <div>
+                    <label for="password1" class="sr-only">Password</label>
+                    <input id="password1" name="password1" type="password" autocomplete="new-password" required
+                        class="appearance-none relative block w-full px-4 py-3 bg-gray-800 border border-gray-700 placeholder-gray-500 text-white focus:outline-none focus:ring-2 focus:ring-rose-600 focus:border-transparent focus:z-10 sm:text-sm"
+                        placeholder="Password">
+                </div>
+                <div>
+                    <label for="password2" class="sr-only">Confirm Password</label>
+                    <input id="password2" name="password2" type="password" autocomplete="new-password" required
+                        class="appearance-none rounded-b-lg relative block w-full px-4 py-3 bg-gray-800 border border-gray-700 placeholder-gray-500 text-white focus:outline-none focus:ring-2 focus:ring-rose-600 focus:border-transparent focus:z-10 sm:text-sm"
+                        placeholder="Confirm Password">
+                </div>
+            </div>
+
+            <div class="flex items-center">
+                <input id="terms" name="terms" type="checkbox" required
+                    class="h-4 w-4 text-rose-600 bg-gray-800 border-gray-700 rounded focus:ring-rose-500">
+                <label for="terms" class="ml-2 block text-sm text-gray-300">
+                    I agree to the <a href="#" class="text-rose-600 hover:text-rose-500">Terms of Service</a> and <a
+                        href="#" class="text-rose-600 hover:text-rose-500">Privacy Policy</a>
+                </label>
+            </div>
+
+            <div>
+                <button type="submit"
+                    class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-rose-700 hover:bg-rose-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500 transition transform hover:scale-[1.02]">
+                    <span class="absolute left-0 inset-y-0 flex items-center pl-3">
+                        <svg class="h-5 w-5 text-rose-500 group-hover:text-rose-400" xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path fill-rule="evenodd"
+                                d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
+                                clip-rule="evenodd" />
+                        </svg>
+                    </span>
+                    Create Account
+                </button>
+            </div>
+        </form>
+
+        <div class="mt-6">
+            <div class="relative">
+                <div class="absolute inset-0 flex items-center">
+                    <div class="w-full border-t border-gray-700"></div>
+                </div>
+                <div class="relative flex justify-center text-sm">
+                    <span class="px-2 bg-zinc-900 text-gray-400">
+                        Or sign up with
+                    </span>
+                </div>
+            </div>
+
+            <div class="mt-6 grid grid-cols-2 gap-3">
+                <div>
+                    <a href="#"
+                        class="w-full inline-flex justify-center py-2 px-4 border border-gray-700 rounded-lg shadow-sm bg-gray-800 text-sm font-medium text-gray-300 hover:bg-gray-700">
+                        <img class="h-5 w-5" src="https://www.svgrepo.com/show/512120/facebook-176.svg" alt="Facebook">
+                        <span class="ml-2">Facebook</span>
+                    </a>
+                </div>
+
+                <div>
+                    <a href="#"
+                        class="w-full inline-flex justify-center py-2 px-4 border border-gray-700 rounded-lg shadow-sm bg-gray-800 text-sm font-medium text-gray-300 hover:bg-gray-700">
+                        <img class="h-5 w-5" src="https://www.svgrepo.com/show/513008/google-177.svg" alt="Google">
+                        <span class="ml-2">Google</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -15,7 +15,7 @@ from django.views.generic import CreateView, DeleteView, DetailView, UpdateView,
 
 from . import services
 from .forms import AlbumForm, ArtistCreateForm, TrackInAlbumFormSet
-from .mixins import UserManageArtist
+from .mixins import UserHasArtist, UserManageArtist
 from .models import Album, Artist, Track
 
 
@@ -30,7 +30,7 @@ class IndexView(View):
 
 
 # *Artist views
-class ArtistCreateView(LoginRequiredMixin, CreateView):
+class ArtistCreateView(UserHasArtist, CreateView):
     """Представление создания карточки артиста."""
 
     model = Artist
@@ -45,7 +45,7 @@ class ArtistCreateView(LoginRequiredMixin, CreateView):
         return redirect(self.get_success_url())
 
     def get_success_url(self) -> str:
-        return reverse(self.success_url, kwargs={"artist_id": self.object.id})  # type: ignore
+        return reverse(self.success_url, kwargs={"artist_id": self.object.id})
 
 
 class ArtistDetailView(DetailView):
