@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-
+{% load static %}
 {% block title %}{{ album.title }}{% endblock %}
 
 {% block content %}
@@ -10,7 +10,6 @@
             <h1 class="text-4xl font-bold mb-2">{{ album.title }}</h1>
             <p class="text-gray-400 mb-4">By {{ album.artist.name }}</p>
         </div>
-
         {% if request.user == album.artist.user or request.user.is_superuser %}
         <div class="flex space-x-2">
             <!-- Кнопка редактирования -->
@@ -113,14 +112,17 @@
                         <td class="py-4 text-gray-400">{{ track.duration|time:"i:s" }}</td>
                         <td class="py-4 text-right">
                             <button class="play-track text-rose-600 hover:text-rose-500 p-2"
-                                data-src="{{ track.audio.url }}" data-title="{{ track.title }}"
-                                data-artist="{{ album.artist.name }}">
+                                data-index="{{ forloop.counter0 }}">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z">
                                     </path>
                                 </svg>
                             </button>
+                            <audio id="player" controls preload="none">
+                                <source src="{% url 'stream:stream' track.id %}" type="audio/mpeg">
+                                Ваш браузер не поддерживает <audio>.
+                                </audio>
                         </td>
                     </tr>
                     {% endfor %}
@@ -128,5 +130,6 @@
             </table>
         </div>
     </div>
+
 </div>
 {% endblock %}

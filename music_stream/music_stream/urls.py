@@ -24,6 +24,7 @@ urlpatterns = [
     path("", include("music.urls")),
     path("admin/", admin.site.urls),
     path("users/", include("users.urls")),
+    path("stream/", include("stream.urls")),
     *debug_toolbar_urls(),
     path("__reload__/", include("django_browser_reload.urls")),
 ]
