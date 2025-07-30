@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     "tailwind",
     "minio_storage",
     "django_browser_reload",
+    "auth",
     "music",
     "users",
     "theme",
@@ -199,3 +200,6 @@ MEDIA_ROOT = BASE_DIR / "media"
 # * constants
 GOOGLE_OAUTH_BASE_URL = "https://accounts.google.com/o/oauth2/v2/auth"
 GOOGLE_OAUTH_REDIRECT_URI = "http://localhost:8000/auth/google/callback"
+
+GOOGLE_OAUTH_BASE_URL = "https://accounts.google.com/o/oauth2/v2/auth"
+GOOGLE_OAUTH_REDIRECT_URI = " http://localhost:8000/auth/google/callback"
