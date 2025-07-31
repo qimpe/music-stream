@@ -7,9 +7,10 @@ from music.services import ArtistService
 class UserService:
     """Сервис для модели: User."""
 
-    def create_user(self, email: str) -> User:
-        """Создает пользователя и возвращает его."""
-        return User.objects.create_user(email=email, username=email)
+    def get_or_create_user(self, email: str) -> User:
+        """Проверяет есть ли уже зарегистрированный пользователь, если нет то создает, если есть то возвращает."""
+        user, created = User.objects.get_or_create(email=email, username=email)
+        return user
 
     def fetch_user_by_id(self, user_id: int) -> QuerySet[User]:
         """Возвращает пользователя по его id."""

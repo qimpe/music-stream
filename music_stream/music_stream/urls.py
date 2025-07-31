@@ -24,7 +24,7 @@ urlpatterns = [
     path("", include("music.urls")),
     path("admin/", admin.site.urls),
     path("users/", include("users.urls")),
-    path("auth/", include("auth.urls")),
+    path("oauth2/", include("oauth.urls")),
     *debug_toolbar_urls(),
     path("__reload__/", include("django_browser_reload.urls")),
 ]

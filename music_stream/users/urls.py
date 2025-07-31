@@ -9,6 +9,4 @@ urlpatterns = [
     path("sign-up/", views.SignUpView.as_view(), name="sign_up"),
     path("sign-out/", views.SignOutView.as_view(), name="sign_out"),
     path("profile/<int:user_id>/", views.ProfileDetailView.as_view(), name="profile"),
-    path("google/", views.GoogleOAuth.as_view(), name="google_oauth"),
-    path("google/callback/", views.GoogleOAuthCallback.as_view(), name="google_auth_callback"),
 ]

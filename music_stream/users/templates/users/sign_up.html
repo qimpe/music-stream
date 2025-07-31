@@ -99,15 +99,15 @@
 
             <div class="mt-6 grid grid-cols-2 gap-3">
                 <div>
-                    <a href="#"
+                    <a href="{% url 'oauth:oauth' 'github' %}"
                         class="w-full inline-flex justify-center py-2 px-4 border border-gray-700 rounded-lg shadow-sm bg-gray-800 text-sm font-medium text-gray-300 hover:bg-gray-700">
-                        <img class="h-5 w-5" src="https://www.svgrepo.com/show/512120/facebook-176.svg" alt="Facebook">
-                        <span class="ml-2">Facebook</span>
+                        <img class="h-5 w-5" src="https://www.svgrepo.com/show/439171/github.svg" alt="github">
+                        <span class="ml-2">Github</span>
                     </a>
                 </div>
 
                 <div>
-                    <a href="{% url 'users:google_oauth' %}"
+                    <a href="{% url 'oauth:oauth' 'google' %}"
                         class="w-full inline-flex justify-center py-2 px-4 border border-gray-700 rounded-lg shadow-sm bg-gray-800 text-sm font-medium text-gray-300 hover:bg-gray-700">
                         <img class="h-5 w-5" src="https://www.svgrepo.com/show/513008/google-177.svg" alt="Google">
                         <span class="ml-2">Google</span>
