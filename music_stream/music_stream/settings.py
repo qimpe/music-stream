@@ -28,6 +28,12 @@ SECRET_KEY = os.getenv("APP_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+if DEBUG:
+    CORS_ALLOW_ALL_ORIGINS = True
+    CSRF_TRUSTED_ORIGINS = ["http://localhost:8000", "https://localhost:8000"]
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = False
+    ALLOWED_HOSTS = ["*"]
 
 ALLOWED_HOSTS = []
 
@@ -44,6 +50,7 @@ INSTALLED_APPS = [
     "tailwind",
     "minio_storage",
     "django_browser_reload",
+    "oauth",
     "music",
     "users",
     "theme",
@@ -189,3 +196,11 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
+
+
+# * constants
+GOOGLE_OAUTH_BASE_URL = "https://accounts.google.com/o/oauth2/v2/auth"
+GOOGLE_OAUTH_REDIRECT_URI = "http://localhost:8000/auth/google/callback"
+
+GOOGLE_OAUTH_BASE_URL = "https://accounts.google.com/o/oauth2/v2/auth"
+GOOGLE_OAUTH_REDIRECT_URI = " http://localhost:8000/auth/google/callback"
