@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 from typing import Literal, Optional, TypedDict, TypeVar
 
 import jwt
+import requests
 from django.contrib.auth.models import User
 from dotenv import load_dotenv
 from requests.adapters import Response
@@ -95,6 +96,10 @@ class OAuthOperations(ABC):
     def process_data_after_code_exchange(self, response: Response) -> User | None:
         """Обработка данных, которые пришли после обмена кода на access токен."""
 
+    @abstractmethod
+    def get_headers_for_access_token_request(self) -> dict:
+        """Добавляет заголовки для запроса на access_token."""
+
 
 class OAuthFactory(ABC):
     """Абстрактная фабрика провайдеров OAuth."""
@@ -117,11 +122,11 @@ class OAuthFactory(ABC):
 
 class GoogleOAuthOperations(OAuthOperations):
     def __init__(self) -> None:
-        self._config = OAuthConfig.auth_services["google"]
+        self.__config = OAuthConfig.auth_services["google"]
 
     @property
     def config(self) -> ProviderConfig:
-        return self._config
+        return self.__config
 
     def generate_oauth_redirect_uri(self) -> str:
         base_url = self.config["BASE_URL"]
@@ -151,22 +156,25 @@ class GoogleOAuthOperations(OAuthOperations):
         }
 
     def process_data_after_code_exchange(self, response: Response) -> User | None:
-        print(response.json())
-        response = response.json()
-        id_token = response["id_token"]  # type: ignore
+        id_token = response.json().get("id_token")
         user_data = jwt.decode(
             id_token,
             algorithms=["RS256"],
             options={"verify_signature": False},
         )
         user_service = UserService()
-        if user := user_service.get_or_create_user(user_data["email"]):
+        if (email := user_data.get("email")) and (user := user_service.get_or_create_user(email)):
             return user
         return None
 
+    def get_headers_for_access_token_request(self) -> dict:
+        return super().get_headers_for_access_token_request()
 
+
+# TODO make a state
 class GithubOAuthOperations(OAuthOperations):
-    __config = OAuthConfig.auth_services["github"]
+    def __init__(self) -> None:
+        self.__config = OAuthConfig.auth_services["github"]
 
     @property
     def config(self) -> ProviderConfig:
@@ -198,18 +206,23 @@ class GithubOAuthOperations(OAuthOperations):
         }
 
     def process_data_after_code_exchange(self, response: Response) -> User | None:
-        print(response.json())
-        response = response.json()
-        id_token = response["id_token"]  # type: ignore
-        user_data = jwt.decode(
-            id_token,
-            algorithms=["RS256"],
-            options={"verify_signature": False},
-        )
+        access_token = response.json().get("access_token")
+        user_data = requests.get(
+            "https://api.github.com/user",
+            headers={"Authorization": f"Bearer {access_token}"},
+            timeout=5,
+        ).json()
         user_service = UserService()
-        if user := user_service.get_or_create_user(user_data["email"]):
+        if email := not user_data.get("email"):
+            return None
+        kwargs = {"email": email, "username": user_data.get("login")}
+        if user := user_service.get_or_create_user(**kwargs):
             return user
         return None
+
+    def get_headers_for_access_token_request(self) -> dict:
+        """Добавляет заголовки для запроса на access_token."""
+        return {"Accept": "application/json"}
 
 
 class GoogleOAuthFactory(OAuthFactory):
@@ -218,5 +231,5 @@ class GoogleOAuthFactory(OAuthFactory):
 
 
 class GithubOAuthFactory(OAuthFactory):
-    def create_operations(self) -> GoogleOAuthOperations:
-        return GoogleOAuthOperations()
+    def create_operations(self) -> GithubOAuthOperations:
+        return GithubOAuthOperations()
