@@ -190,7 +190,7 @@ class GithubOAuthOperations(OAuthOperations):
         return {
             "client_id": self.config["CLIENT_ID"],
             "redirect_uri": self.config["BASE_REDIRECT_URI"],
-            "scope": "user:email",
+            "scope": "user",
         }
 
     def fetch_redirect_url(self) -> str:
