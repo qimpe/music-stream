@@ -18,7 +18,12 @@ document.addEventListener('DOMContentLoaded', function() {
             let currentTrackIndex = 0;
             let isPlaying = false;
             let isLiked = false;
-            
+            function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
+            }
+
             // Загрузка трека
             function loadTrack(index) {
                 const track = playlist[index];
@@ -30,15 +35,23 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Сброс прогресса
                 progressBar.value = 0;
                 currentTimeElement.textContent = '0:00';
-                
+                const duration = parseInt(track.duration);
+                if (!isNaN(duration)) {
+                    totalTimeElement.textContent = formatTime(duration);
+                    }
                 // Обновление времени трека после загрузки метаданных
+                totalTimeElement.textContent = "Загрузка...";
                 audio.onloadedmetadata = function() {
                     const totalMinutes = Math.floor(audio.duration / 60);
                     const totalSeconds = Math.floor(audio.duration % 60);
                     totalTimeElement.textContent = `${totalMinutes}:${totalSeconds < 10 ? '0' : ''}${totalSeconds}`;
+                    if (audioPlayer.duration) {
+            totalTimeElement.textContent = formatTime(audioPlayer.duration);
+        }
                 };
             }
             
+        });
             // Воспроизведение/пауза
             function togglePlay() {
                 if (isPlaying) {

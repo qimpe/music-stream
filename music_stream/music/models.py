@@ -104,10 +104,13 @@ class Album(Music):
 class Track(Music):
     cover = models.ImageField(upload_to="music_covers/", verbose_name="Обложка")
     audio_file = models.FileField(upload_to="tracks/")
+    hls_playlist = models.FileField(upload_to="tracks/", null=True)
     release_date = models.DateTimeField(null=True, verbose_name="Дата релиза")
     status = models.CharField(
         max_length=15, choices=Status.choices, null=False, default=Status.PENDING, verbose_name="Статус"
     )
+
+    is_hls_processed = models.BooleanField(default=False)
 
     class Meta(TypedModelMeta):  # type: ignore[assignment]
         indexes = [
@@ -149,7 +152,7 @@ class AlbumArtist(models.Model):
 
 
 class TrackMetadata(models.Model):
-    track = models.OneToOneField(Track, on_delete=models.CASCADE)
+    track = models.OneToOneField(Track, on_delete=models.CASCADE, related_name="tracks_metadata")
     duration = models.PositiveSmallIntegerField()
     bitrate = models.PositiveSmallIntegerField()
     file_size = models.PositiveIntegerField()

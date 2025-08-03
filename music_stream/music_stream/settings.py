@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     "music",
     "users",
     "theme",
+    "track_stream",
 ]
 
 MIDDLEWARE = [

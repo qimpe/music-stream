@@ -4,16 +4,14 @@
 
 {% block content %}
 <div class="album-detail max-w-4xl mx-auto p-6">
-    <!-- Хедер альбома с кнопками управления -->
+    <!-- Хедер альбома -->
     <div class="flex justify-between items-start mb-6">
         <div>
             <h1 class="text-4xl font-bold mb-2">{{ album.title }}</h1>
             <p class="text-gray-400 mb-4">By {{ album.artist.name }}</p>
         </div>
-
         {% if request.user == album.artist.user or request.user.is_superuser %}
         <div class="flex space-x-2">
-            <!-- Кнопка редактирования -->
             <a href="{% url 'music:update_album' album.id %}"
                 class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg flex items-center">
                 <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -23,8 +21,6 @@
                 </svg>
                 Edit
             </a>
-
-            <!-- Кнопка удаления -->
             <a href="{% url 'music:delete_album' album.id %}"
                 class="bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg flex items-center">
                 <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -38,15 +34,13 @@
         {% endif %}
     </div>
 
+    <!-- Информация об альбоме -->
     <div class="bg-zinc-900 p-6 rounded-2xl border border-gray-700 shadow-lg mb-8">
         <div class="flex flex-col md:flex-row gap-8">
-            <!-- Обложка альбома -->
             <div class="md:w-1/3">
                 <img src="{{ album.cover.url }}" alt="{{ album.title }}"
                     class="w-full rounded-xl shadow-lg object-cover">
             </div>
-
-            <!-- Информация об альбоме -->
             <div class="md:w-2/3">
                 <div class="mb-6">
                     <h2 class="text-xl font-semibold text-gray-300 mb-2">Album Info</h2>
@@ -69,7 +63,6 @@
                         </div>
                     </div>
                 </div>
-
                 <button
                     class="play-all bg-rose-600 hover:bg-rose-700 text-white font-bold py-3 px-6 rounded-lg flex items-center mb-6"
                     data-album-id="{{ album.id }}">
@@ -92,14 +85,12 @@
             <h2 class="text-2xl font-bold">Tracks</h2>
             <p class="text-gray-400">{{ album.tracks.count }} songs</p>
         </div>
-
         <div class="relative overflow-x-auto">
             <table class="w-full text-left">
                 <thead class="text-gray-400 border-b border-gray-700">
                     <tr>
                         <th class="pb-3">#</th>
                         <th class="pb-3">Title</th>
-                        <th class="pb-3">Genre</th>
                         <th class="pb-3">Duration</th>
                         <th class="pb-3"></th>
                     </tr>
@@ -109,12 +100,14 @@
                     <tr class="border-b border-gray-800 hover:bg-gray-800/50 transition-colors">
                         <td class="py-4">{{ forloop.counter }}</td>
                         <td class="py-4 font-medium">{{ track.title }}</td>
-                        <td class="py-4 text-gray-400">{{ track.genre }}</td>
-                        <td class="py-4 text-gray-400">{{ track.duration|time:"i:s" }}</td>
+                        <td class="py-4 text-gray-400">{{ track.tracks_metadata.duration}}</td>
                         <td class="py-4 text-right">
                             <button class="play-track text-rose-600 hover:text-rose-500 p-2"
-                                data-src="{{ track.audio.url }}" data-title="{{ track.title }}"
-                                data-artist="{{ album.artist.name }}">
+                                data-track-id="{{ track.id }}" data-track-title="{{ track.title }}"
+                                data-artist="{{ album.artist.name }}" data-cover-url="{{ album.cover.url }}"
+                                data-playlist-url="{{ track.hls_playlist.url }}"
+                                data-duration="{{ track.tracks_metadata.duration }}">
+
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z">
@@ -129,4 +122,47 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Функция для воспроизведения трека
+        function playTrack(trackData) {
+            // Отправляем событие глобальному плееру
+            const event = new CustomEvent('playTrack', {
+                detail: trackData
+            });
+            document.dispatchEvent(event);
+        }
+
+        // Обработчики для кнопок треков
+        document.querySelectorAll('.play-track').forEach(button => {
+            button.addEventListener('click', function () {
+                const trackData = {
+                    id: this.dataset.trackId,
+                    title: this.dataset.trackTitle,
+                    artist: this.dataset.artist,
+                    coverUrl: this.dataset.coverUrl,
+                    playlistUrl: this.dataset.playlistUrl,
+                    duration: this.dataset.duration
+                };
+                playTrack(trackData);
+            });
+        });
+
+        // Кнопка "Play Album"
+        document.querySelector('.play-all').addEventListener('click', function () {
+            const firstTrack = document.querySelector('.play-track');
+            if (firstTrack) {
+                const trackData = {
+                    id: firstTrack.dataset.trackId,
+                    title: firstTrack.dataset.trackTitle,
+                    artist: firstTrack.dataset.artist,
+                    coverUrl: firstTrack.dataset.coverUrl,
+                    playlistUrl: firstTrack.dataset.playlistUrl
+                };
+                playTrack(trackData);
+            }
+        });
+    });
+</script>
 {% endblock %}

@@ -1,22 +1,20 @@
 import typing
 
-from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.db.models.query import QuerySet
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse
 from django.http.request import HttpRequest
 from django.http.response import HttpResponseBase, HttpResponseNotFound, HttpResponseRedirect
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import redirect, render
 from django.urls import reverse, reverse_lazy
 from django.views.generic import CreateView, DeleteView, DetailView, UpdateView, View
 
 from . import services
 from .forms import AlbumForm, ArtistCreateForm, TrackInAlbumFormSet
 from .mixins import UserHasArtist, UserManageArtist
-from .models import Album, Artist, Track
+from .models import Album, Artist
 
 
 # * index
@@ -185,25 +183,3 @@ class AlbumDetailView(DetailView):
         context["album_length"] = album_tracks_service.count_album_length_in_minutes(tracks)
         context["album_tracks"] = tracks
         return context
-
-
-@login_required
-def get_track_url(request, track_id):
-    Track.objects.get(id=track_id)
-    stream_url = f"/stream/{track_id}/"
-    return JsonResponse({"url": stream_url})
-
-
-@login_required
-def stream_track(request, track_id):
-    track = get_object_or_404(Track, id=track_id)
-    bucket = settings.MINIO_STORAGE_MEDIA_BUCKET_NAME
-    key = track.audio_file.name
-    print(key)
-    internal_path = f"/internal-stream/{bucket}/{key}"
-    print(internal_path)
-    response = HttpResponse()
-    response["X-Accel-Redirect"] = internal_path
-    response["Content-Type"] = "audio/mpeg"  # Настройте в зависимости от типа файла
-    response["Accept-Ranges"] = "bytes"
-    return response

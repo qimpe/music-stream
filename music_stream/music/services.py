@@ -134,6 +134,10 @@ class AlbumArtistService:
 class TrackService:
     """Сервис для модели: Track."""
 
+    def fetch_track_by_id(self, track_id: int) -> Track:
+        """Возвращает трек по его id в ином случае исключение 'DoesNotExist'."""
+        return Track.objects.get(id=track_id)
+
     def create_metadata_for_tracks_list(self, tracks_list: list[Track]) -> None:
         """Создает метаданные для списка треков и возвращает объекты TrackMetadata."""
         tracks_metadata = []
@@ -196,6 +200,14 @@ class TrackService:
             for form in track_formset
         ]
 
+    def update_track_hls_playlist_url(self, track_id: int, playlist_url: str) -> None:
+        """Обновляет url плейлиста с фрагментами треков."""
+        Track.objects.filter(id=track_id).update(hls_playlist=playlist_url)
+        a = Track.objects.get(id=track_id)
+        print(a.hls_playlist.url)
+        print(a.hls_playlist)
+        print("1" * 100)
+
 
 class TrackInAlbumService:
     """Сервис для модели: TrackInAlbum."""
@@ -207,10 +219,12 @@ class TrackInAlbumService:
 
     def fetch_tracks_in_album(self, album_id: int) -> QuerySet[Track]:
         """возвращает все треки в альбоме."""
-        track_ids = (
-            TrackInAlbum.objects.filter(album_id=album_id).values_list("track_id", flat=True).order_by("position")
+        return (
+            Track.objects.filter(trackinalbum__album_id=album_id)  # Используем обратную связь
+            .select_related("tracks_metadata")  # Жадная загрузка метаданных
+            .order_by("trackinalbum__position")  # Сортировка по позиции в альбоме
+            .distinct()
         )
-        return Track.objects.filter(id__in=track_ids)
 
     def count_album_length_in_minutes(self, tracks: QuerySet[Track]) -> str:
         """Возвращает длину альбома в минутах в качестве строки."""

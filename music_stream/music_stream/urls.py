@@ -25,6 +25,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("users/", include("users.urls")),
     path("oauth2/", include("oauth.urls")),
+    path("", include("track_stream.urls")),
     *debug_toolbar_urls(),
     path("__reload__/", include("django_browser_reload.urls")),
 ]
