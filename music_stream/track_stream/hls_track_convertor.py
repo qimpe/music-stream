@@ -31,31 +31,7 @@ class TrackConvertorHLS:
             minio.client.fget_object("media", track.audio_file.name, temp_file)
             output_dir = Path(temp_dir, f"hls_f{track_id}")
             Path.mkdir(output_dir)
-            """cmd = [
-                "ffmpeg",
-                "-y",
-                "-i",
-                temp_file,
-                "-c:a",
-                "aac",
-                "-b:a",
-                "256k",
-                "-ar",
-                "44100",
-                "-ac",
-                "2",
-                "-f",
-                "segment",
-                "-segment_time",
-                "7",
-                "-segment_format",
-                "mpegts",
-                "-segment_list",
-                str(Path(output_dir, "playlist.m3u8")),
-                "-segment_list_type",
-                "m3u8",
-                str(Path(output_dir, "segment_%03d.ts")),
-            ]"""
+
             cmd = [
                 "ffmpeg",
                 "-y",

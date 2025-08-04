@@ -125,7 +125,7 @@ class AlbumCreateView(LoginRequiredMixin, CreateView):
         )
 
     def get_success_url(self) -> str:
-        return reverse("music:album_detail", kwargs={"album_id": self.object.id})
+        return reverse("users:profile", kwargs={"user_id": self.request.id})
 
 
 class AlbumDeleteView(LoginRequiredMixin, DeleteView):
