@@ -5,6 +5,8 @@ from django.db import models
 from django.utils.text import slugify
 from django_stubs_ext.db.models import TypedModelMeta
 
+from music_stream.minio import MinioClient
+
 
 # Create your models here.
 class Status(models.TextChoices):
@@ -109,7 +111,6 @@ class Track(Music):
     status = models.CharField(
         max_length=15, choices=Status.choices, null=False, default=Status.PENDING, verbose_name="Статус"
     )
-
     is_hls_processed = models.BooleanField(default=False)
 
     class Meta(TypedModelMeta):  # type: ignore[assignment]
@@ -120,6 +121,11 @@ class Track(Music):
 
     def save(self, *args: typing.Any, **kwargs: typing.Any) -> None:
         super().save(*args, **kwargs)
+
+    @property
+    def hls_presigned_playlist_url(self) -> str:
+        minio = MinioClient()
+        return minio.fetch_presigned_track_hsl_playlist_url(self.hls_playlist.name)
 
 
 class Playlist(Music):

@@ -3,10 +3,12 @@ from django.contrib.auth.models import User
 
 
 class SignUpForm(UserCreationForm):
+    """Форма регистрации пользователя."""
+
     class Meta:
         model = User
         fields = ("email", "username", "password1", "password2")
 
 
 class SignInForm(AuthenticationForm):
-    pass
+    """Форма входа пользователя."""

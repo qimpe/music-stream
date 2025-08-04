@@ -105,7 +105,7 @@
                             <button class="play-track text-rose-600 hover:text-rose-500 p-2"
                                 data-track-id="{{ track.id }}" data-track-title="{{ track.title }}"
                                 data-artist="{{ album.artist.name }}" data-cover-url="{{ album.cover.url }}"
-                                data-playlist-url="{{ track.hls_playlist.url }}"
+                                data-playlist-url="{{ track.hls_presigned_playlist_url }}"
                                 data-duration="{{ track.tracks_metadata.duration }}">
 
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

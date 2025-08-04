@@ -10,18 +10,22 @@ from .forms import SignInForm, SignUpForm
 
 
 class SignUpView(CreateView):
+    """Представление регистарции аккаунта."""
+
     form_class = SignUpForm
     template_name = "users/sign_up.html"
 
 
 class SignInView(LoginView):
+    """Представление входа из аккаунта."""
+
     form_class = SignInForm
     template_name = "users/sign_in.html"
     redirect_authenticated_user = True
 
 
 class SignOutView(LogoutView):
-    pass
+    """Представление выхода из аккаунта."""
 
 
 class ProfileDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
@@ -38,9 +42,13 @@ class ProfileDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
             return True
         return None
 
+    def get_object(self, queryset: services.QuerySet | None = ...) -> typing.Any:
+        self.object = self.request.user
+        return self.object
+
     def get_context_data(self, **kwargs: typing.Any) -> dict[str, typing.Any]:
-        user = self.request.user
         context = super().get_context_data(**kwargs)
+        user = self.object
         service = services.ArtistService()
-        context["user_artist"] = service.fetch_artist_by_user_id(user.id)
+        context["user_artist"] = service.fetch_artist_by_user_id(user.pk)
         return context
