@@ -12,6 +12,10 @@ services:
     volumes:
       - minio-storage:/data
 
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
 
   nginx:
     image: nginx:stable-alpine

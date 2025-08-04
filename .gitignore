@@ -14,4 +14,7 @@ wheels/
 /music_stream/.pytest_cache
 /music_stream/.coverage
 /music_stream/.coveragerc
-/music_stream/theme/static_src/node_modules
+
+/music_stream/htmlcov
+/music_stream/apps/theme/static_src/node_modules
+/.env
