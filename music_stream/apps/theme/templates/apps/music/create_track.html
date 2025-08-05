@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto p-4">
+    <div class="mb-8 text-center">
+        <h1 class="text-3xl font-bold text-white mb-2">Upload New Track</h1>
+        <p class="text-gray-400">Share your music with the world</p>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" class="space-y-6">
+        {% csrf_token %}
+        
+        <!-- Основная карточка с формой -->
+        <div class="bg-zinc-900 p-6 rounded-2xl border border-gray-700 shadow-lg">
+            <div class="space-y-6">
+                <!-- Поле: Название трека -->
+                <div>
+                    <label for="{{ form.title.id_for_label }}" class="block text-gray-300 mb-2 text-lg">
+                        Track Title
+                    </label>
+                    <input type="text" name="{{ form.title.name }}" id="id_title"
+                        class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white 
+                               focus:ring-2 focus:ring-rose-600 focus:border-transparent outline-none transition
+                               placeholder-gray-500"
+                        placeholder="Enter track name" 
+                        value="{{ form.title.value|default:'' }}">
+                    {% for error in form.title.errors %}
+                    <p class="text-red-500 text-sm mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>
+                
+                <!-- Поле: Обложка трека -->
+                <div>
+                    <label class="block text-gray-300 mb-2 text-lg">Track Cover (Optional)</label>
+                    <div class="relative group">
+                        <input type="file" name="cover" id="id_cover" 
+                            class="cover-file-input absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                            accept="image/*">
+                        
+                        <!-- Зона загрузки обложки -->
+                        <div id="cover-upload-instruction" class="cover-upload-area border-2 border-dashed border-gray-600 rounded-xl p-8 text-center
+                                    group-hover:border-rose-500 transition-colors">
+                            <div class="mx-auto w-16 h-16 bg-rose-900/30 rounded-full flex items-center justify-center mb-4">
+                                <svg class="w-8 h-8 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                          d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                </svg>
+                            </div>
+                            <p class="text-gray-400 mb-1">Drag & drop your cover image here</p>
+                            <p class="text-sm text-gray-500">or click to browse (JPG, PNG)</p>
+                        </div>
+                        
+                        <!-- Превью обложки (скрыто по умолчанию) -->
+                        <div id="cover-preview-container" class="hidden">
+                            <div class="flex flex-col md:flex-row items-center">
+                                <div class="w-40 h-40 rounded-xl overflow-hidden border border-gray-700 mb-4 md:mb-0 md:mr-4">
+                                    <img id="cover-preview" class="w-full h-full object-cover" src="#" alt="Cover preview">
+                                </div>
+                                <div class="flex-1">
+                                    <div class="text-white font-medium mb-1">Cover Image</div>
+                                    <div id="cover-file-name" class="text-gray-400 text-sm truncate mb-2">cover.jpg</div>
+                                    <button type="button" id="change-cover" class="text-rose-500 hover:text-rose-400">
+                                        Change Cover
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Поле: Аудиофайл -->
+                <div>
+                    <label class="block text-gray-300 mb-2 text-lg">Audio File</label>
+                    <div class="relative group">
+                        <input type="file" name="{{ form.audio_file.name }}" id="id_audio_file" 
+                            class="audio-file-input absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                            accept="audio/*">
+                        
+                        <!-- Зона загрузки по умолчанию -->
+                        <div id="upload-instruction" class="audio-upload-area border-2 border-dashed border-gray-600 rounded-xl p-8 text-center
+                                    group-hover:border-rose-500 transition-colors">
+                            <div class="mx-auto w-16 h-16 bg-rose-900/30 rounded-full flex items-center justify-center mb-4">
+                                <svg class="w-8 h-8 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                          d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
+                                </svg>
+                            </div>
+                            <p class="text-gray-400 mb-1">Drag & drop your audio file here</p>
+                            <p class="text-sm text-gray-500">or click to browse (MP3, WAV, FLAC)</p>
+                        </div>
+                        
+                        <!-- Карточка с информацией о файле (скрыта по умолчанию) -->
+                        <div id="file-info" class="hidden bg-gray-800 border border-gray-700 rounded-xl p-4">
+                            <div class="flex items-center">
+                                <div class="mr-4 text-rose-500">
+                                    <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                              d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
+                                    </svg>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <div id="file-name" class="text-white font-medium truncate">filename.mp3</div>
+                                    <div id="file-size" class="text-gray-400 text-sm">5.2 MB</div>
+                                </div>
+                                <button type="button" id="change-file" class="ml-4 text-rose-500 hover:text-rose-400">
+                                    Change
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {% for error in form.audio_file.errors %}
+                    <p class="text-red-500 text-sm mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>
+
+                <!-- Поле: Explicit -->
+                <div class="flex items-center pt-2">
+                    <label class="flex items-center cursor-pointer">
+                        <input type="checkbox" name="{{ form.is_explicit.name }}"
+                            id="{{ form.is_explicit.id_for_label }}"
+                            class="hidden peer" {% if form.is_explicit.value %}checked{% endif %}>
+                        <div class="relative w-10 h-6 bg-gray-700 peer-checked:bg-rose-700 rounded-full transition-colors">
+                            <div class="absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform peer-checked:translate-x-4"></div>
+                        </div>
+                        <div class="ml-3">
+                            <span class="text-gray-300">Explicit Content</span>
+                            <p class="text-sm text-gray-500">Enable for tracks with mature content</p>
+                        </div>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Аудиоплеер для предпрослушивания -->
+        <div id="audio-preview" class="bg-zinc-900 p-6 rounded-2xl border border-gray-700 shadow-lg hidden">
+            <h2 class="text-xl font-semibold text-white mb-4">Audio Preview</h2>
+            <div class="flex items-center">
+                <div class="flex-1">
+                    <div class="w-full bg-gray-800 rounded-full overflow-hidden">
+                        <div id="waveform" class="h-12 bg-gradient-to-r from-rose-700/30 to-rose-500/10"></div>
+                    </div>
+                </div>
+                <button id="play-preview" class="ml-4 text-rose-500 hover:text-rose-400">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </button>
+            </div>
+            <audio id="preview-player" class="hidden"></audio>
+        </div>
+
+        <!-- Кнопка отправки -->
+        <div class="flex justify-center mt-8">
+            <button type="submit" 
+                class="bg-gradient-to-r from-rose-700 to-rose-600 hover:from-rose-600 hover:to-rose-500
+                       text-white font-bold py-3 px-8 rounded-full text-lg transition transform hover:scale-[1.02]
+                       flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                          d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                </svg>
+                Upload Track
+            </button>
+        </div>
+    </form>
+</div>
+<script src="{% static 'js/music/create_track.js' %}"></script>
+
+<style>
+.audio-upload-area, .cover-upload-area {
+    transition: all 0.3s ease;
+}
+
+/* Анимация для визуализации */
+@keyframes pulse {
+    0% { opacity: 0.5; transform: scaleY(0.8); }
+    50% { opacity: 1; transform: scaleY(1.2); }
+    100% { opacity: 0.5; transform: scaleY(0.8); }
+}
+
+#waveform div {
+    animation: pulse 1.5s infinite ease-in-out;
+    animation-delay: calc(var(--i) * 0.05s);
+    transform-origin: center bottom;
+}
+
+#file-info, #cover-preview-container {
+    transition: all 0.3s ease;
+}
+
+#cover-preview {
+    transition: transform 0.3s ease;
+}
+
+#cover-preview:hover {
+    transform: scale(1.05);
+}
+</style>
+{% endblock %}

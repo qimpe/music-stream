@@ -1,15 +1,15 @@
 import typing
+from itertools import chain
 
 import mutagen
 from apps.track_processing.tasks import process_track
-from celery import group
 from django.core.exceptions import PermissionDenied
 from django.core.files.storage import default_storage
 from django.db import transaction
 from django.db.models import QuerySet, Sum
 from django.http.request import HttpRequest
 
-from .forms import AlbumForm, ArtistCreateForm
+from .forms import AlbumForm, ArtistCreateForm, TrackCreateForm
 from .models import (
     Album,
     AlbumArtist,
@@ -45,9 +45,8 @@ class ArtistService:
         album_service = AlbumArtistService()
         artist_track_service = ArtistTrackService()
         albums = album_service.fetch_artist_albums(artist_id)
-        artist_track_service.fetch_artist_tracks(artist_id)
-        # chain(albums.order_by("release_date"), tracks.order_by("release_date"))
-        return albums
+        tracks = artist_track_service.fetch_artist_tracks(artist_id)
+        return chain(albums, tracks)
 
     def fetch_artist_by_user_id(self, user_id: int) -> Artist | None:
         """Возвращает артиста по id пользователя или возвращает None."""
@@ -88,9 +87,7 @@ class AlbumService:
             tracks_with_positions = track_service.create_track_from_formset(track_formset)
             tracks_data = [track for track, position in tracks_with_positions]
             tracks = Track.objects.bulk_create(tracks_data)
-            track_ids = [track.id for track in tracks]
-            job = group(process_track.s(track_id) for track_id in track_ids)
-            job.apply_async()
+            [track.id for track in tracks]
             album_artist.create_artist_album(artist, album)
             track_in_album.add_tracks_in_album(tracks_with_positions, album)
             track_service.create_metadata_for_tracks_list(tracks)
@@ -136,6 +133,17 @@ class AlbumArtistService:
 
 class TrackService:
     """Сервис для модели: Track."""
+
+    def create_track(self, user_id: int, form: TrackCreateForm) -> None:
+        """Создает трек на основе формы."""
+        with transaction.atomic():
+            artist_service = ArtistService()
+            artist_track_service = ArtistTrackService()
+            artist = artist_service.fetch_artist_by_user_id(user_id)
+            if artist:
+                track = form.save()
+                artist_track_service.create_artist_track(artist.pk, track.id)
+                process_track.delay(track.id)
 
     def fetch_track_by_id(self, track_id: int) -> Track:
         """Возвращает трек по его id в ином случае исключение 'DoesNotExist'."""
@@ -250,8 +258,13 @@ class ArtistTrackService:
     """Сервис для модели: ArtistTrack."""
 
     def fetch_artist_tracks(self, artist_id: int) -> QuerySet[Track]:
+        """Получает все треки артиста по его id."""
         tracks_ids = ArtistTrack.objects.filter(artist_id=artist_id).values_list("track_id", flat=True)
         return Track.objects.filter(id__in=tracks_ids)
+
+    def create_artist_track(self, artist_id: int, track_id: int) -> None:
+        """Связывает артиста с треком."""
+        ArtistTrack.objects.create(artist_id=artist_id, track_id=track_id)
 
 
 class GenreService:

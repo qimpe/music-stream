@@ -64,10 +64,11 @@ class TrackCreateForm(forms.ModelForm):
             FileExtensionValidator(allowed_extensions=["mp3", "wav", "flac"]),
         ],
     )
+    cover = forms.ImageField(required=False)
 
     class Meta(TypedModelMeta):
         model = Track
-        fields = ["title", "audio_file", "is_explicit"]
+        fields = ["title", "audio_file", "is_explicit", "cover"]
 
 
 class TrackInAlbumForm(forms.ModelForm):

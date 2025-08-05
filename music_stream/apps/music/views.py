@@ -12,9 +12,9 @@ from django.urls import reverse, reverse_lazy
 from django.views.generic import CreateView, DeleteView, DetailView, UpdateView, View
 
 from . import services
-from .forms import AlbumForm, ArtistCreateForm, TrackInAlbumFormSet
+from .forms import AlbumForm, ArtistCreateForm, TrackCreateForm, TrackInAlbumFormSet
 from .mixins import UserHasArtist, UserManageArtist
-from .models import Album, Artist
+from .models import Album, Artist, Track
 
 
 # * index
@@ -75,9 +75,8 @@ class ManageArtistView(UserManageArtist, View):
     template_name = "apps/music/manage_artist.html"
 
     def get(self, request: HttpRequest, *args: typing.Any, **kwargs: typing.Any) -> HttpResponse:
-        artist_id = self.kwargs.get("artist_id")
-        if artist_id:
-            return render(request, self.template_name, context={"artist_id": artist_id})  # type: ignore
+        if self.artist:
+            return render(request, self.template_name, context={"artist_id": self.artist.id, "artist": self.artist})  # type: ignore
         return HttpResponseNotFound()
 
 
@@ -125,10 +124,10 @@ class AlbumCreateView(LoginRequiredMixin, CreateView):
         )
 
     def get_success_url(self) -> str:
-        return reverse("users:profile", kwargs={"user_id": self.request.id})
+        return reverse("users:profile", kwargs={"user_id": self.request.user.id})
 
 
-class AlbumDeleteView(LoginRequiredMixin, DeleteView):
+class AlbumDeleteView(UserManageArtist, DeleteView):
     """Представление удаления Album."""
 
     model = Album
@@ -143,7 +142,7 @@ class AlbumDeleteView(LoginRequiredMixin, DeleteView):
         return super().form_valid(form)
 
 
-class AlbumUpdateView(LoginRequiredMixin, UpdateView):
+class AlbumUpdateView(UserManageArtist, UpdateView):
     """Представление обновления данных о альбоме."""
 
     model = Album
@@ -169,8 +168,8 @@ class AlbumUpdateView(LoginRequiredMixin, UpdateView):
 class AlbumDetailView(DetailView):
     model = Album
     pk_url_kwarg = "album_id"
-    template_name = "apps/music/album_detail.html"
     success_url = "music:index"
+    template_name = "apps/music/album_detail.html"
 
     def get_object(self, queryset: QuerySet | None = ...) -> typing.Any:  # pyright: ignore[reportArgumentType]
         album_service = services.AlbumService()
@@ -183,3 +182,28 @@ class AlbumDetailView(DetailView):
         context["album_length"] = album_tracks_service.count_album_length_in_minutes(tracks)
         context["album_tracks"] = tracks
         return context
+
+
+class TrackCreateView(LoginRequiredMixin, CreateView):
+    """Представление создания трека."""
+
+    model = Track
+    form_class = TrackCreateForm
+    success_url = "music:index"
+    template_name = "apps/music/create_track.html"
+
+    def form_valid(self, form: TrackCreateForm) -> HttpResponse:
+        if user_id := self.request.user.id:
+            track_service = services.TrackService()
+            track_service.create_track(user_id, form)  # pyright: ignore[reportArgumentType, reportAttributeAccessIssue]
+            messages.success(self.request, "Трек создан и уже обрабатывается")
+            return redirect(reverse_lazy(self.success_url))
+        return self.form_invalid(form)
+
+
+class TrackDetailView(LoginRequiredMixin, DetailView):
+    """Представление просмотра страницы трека."""
+
+    model = Track
+    pk_url_kwarg = "track_id"
+    template_name = "apps/music/track_detail.html"

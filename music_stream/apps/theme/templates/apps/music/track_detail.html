@@ -1,0 +1,344 @@
+{% extends "base.html" %}
+
+{% block title %}{{ track.title }} - {{ track.artists.first.name }}{% endblock %}
+
+{% block content %}
+<div class="track-detail max-w-4xl mx-auto p-4">
+    <!-- Хедер трека -->
+    <div class="flex justify-between items-start mb-6">
+        <div>
+            <h1 class="text-4xl font-bold mb-2">{{ track.title }}</h1>
+            <p class="text-gray-400 mb-4">By
+                {% for artist in track.artists.all %}
+                <a href="{% url 'music:artist_detail' artist.id %}" class="hover:text-rose-500 transition-colors">
+                    {{ artist.name }}{% if not forloop.last %}, {% endif %}
+                </a>
+                {% endfor %}
+            </p>
+        </div>
+        {% if request.user in track.artists.all.user or request.user.is_superuser %}
+        <div class="flex space-x-2">
+            <a href="#" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg flex items-center">
+                <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
+                    </path>
+                </svg>
+                Edit
+            </a>
+            <a href="#" class="bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg flex items-center">
+                <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                    </path>
+                </svg>
+                Delete
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Основной контент трека -->
+    <div class="flex flex-col lg:flex-row gap-8">
+        <!-- Левая колонка - обложка и управление -->
+        <div class="lg:w-1/3">
+            <div class="bg-zinc-900 p-6 rounded-2xl border border-gray-700 shadow-lg mb-6">
+                <div class="relative">
+                    <img src="{{ track.cover.url|default:'/static/images/default-cover.jpg' }}" alt="{{ track.title }}"
+                        class="w-full rounded-xl shadow-lg aspect-square object-cover mb-4">
+
+                    <div class="flex justify-center">
+                        <button id="play-track-btn"
+                            class="play-button bg-rose-600 hover:bg-rose-700 text-white font-bold py-3 px-8 rounded-full text-lg flex items-center transition-transform hover:scale-105"
+                            data-track-id="{{ track.id }}" data-track-title="{{ track.title }}"
+                            data-artist="{% for artist in track.artists.all %}{{ artist.name }}{% if not forloop.last %}, {% endif %}{% endfor %}"
+                            data-cover-url="{{ track.album.cover.url|default:'/static/images/default-cover.jpg' }}"
+                            data-playlist-url="{{ track.hls_presigned_playlist_url }}">
+                            <svg id="play-icon" class="w-6 h-6 mr-2" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z">
+                                </path>
+                            </svg>
+                            <span id="play-text">Play Track</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Информация о треке -->
+            <div class="bg-zinc-900 p-6 rounded-2xl border border-gray-700 shadow-lg">
+                <h2 class="text-xl font-semibold text-gray-300 mb-4">Track Info</h2>
+                <div class="space-y-3">
+                    <div>
+                        <p class="text-gray-400">Album:</p>
+                        <a href="#" class="text-rose-500 hover:text-rose-400">
+                            {{ track.album.title }}
+                        </a>
+                    </div>
+                    <div>
+                        <p class="text-gray-400">Duration:</p>
+                        <p class="text-white">{{ track.tracks_metadata.duration }}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-400">Genre:</p>
+                        <p class="text-white">{{ track.genre|default:"-" }}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-400">Release Date:</p>
+                        <p class="text-white">{{ track.album.release_date|date:"F j, Y" }}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-400">Explicit:</p>
+                        <p class="text-white">{{ track.is_explicit|yesno:"Yes,No" }}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-400">BPM:</p>
+                        <p class="text-white">{{ track.tracks_metadata.bpm|default:"-" }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Правая колонка - текст песни и дополнительные детали -->
+        <div class="lg:w-2/3">
+            <!-- Текст песни -->
+            <div class="bg-zinc-900 p-6 rounded-2xl border border-gray-700 shadow-lg mb-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-semibold">Lyrics</h2>
+                    <button id="toggle-lyrics" class="text-rose-500 hover:text-rose-400 text-sm">
+                        Show/Hide
+                    </button>
+                </div>
+
+                <div id="lyrics-container" class="prose prose-invert max-w-none text-gray-300">
+                    {% if track.lyrics %}
+                    {{ track.lyrics|linebreaks }}
+                    {% else %}
+                    <div class="text-center py-8 text-gray-500">
+                        <svg class="w-12 h-12 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                            </path>
+                        </svg>
+                        <p>No lyrics available for this track</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Дополнительная информация -->
+            <div class="bg-zinc-900 p-6 rounded-2xl border border-gray-700 shadow-lg">
+                <h2 class="text-xl font-semibold mb-4">About This Track</h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Авторы -->
+                    <div>
+                        <h3 class="text-gray-400 mb-2">Credits</h3>
+                        <ul class="space-y-2">
+                            <li class="text-white">
+                                <span class="text-gray-500">Written by:</span>
+                                {% for writer in track.writers.all %}
+                                {{ writer.name }}{% if not forloop.last %}, {% endif %}
+                                {% empty %}
+                                -
+                                {% endfor %}
+                            </li>
+                            <li class="text-white">
+                                <span class="text-gray-500">Produced by:</span>
+                                {% for producer in track.producers.all %}
+                                {{ producer.name }}{% if not forloop.last %}, {% endif %}
+                                {% empty %}
+                                -
+                                {% endfor %}
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Статистика -->
+                    <div>
+                        <h3 class="text-gray-400 mb-2">Statistics</h3>
+                        <ul class="space-y-2">
+                            <li class="text-white">
+                                <span class="text-gray-500">Listens:</span> {{ track.listens }}
+                            </li>
+                            <li class="text-white">
+                                <span class="text-gray-500">Likes:</span> {{ track.likes.count }}
+                            </li>
+                            <li class="text-white">
+                                <span class="text-gray-500">Added:</span> {{ track.created_at|date:"M d, Y" }}
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Теги -->
+                    <div class="md:col-span-2">
+                        <h3 class="text-gray-400 mb-2">Tags</h3>
+                        <div class="flex flex-wrap gap-2">
+                            {% for tag in track.tags.all %}
+                            <span class="px-3 py-1 bg-gray-800 text-gray-300 rounded-full text-sm">
+                                {{ tag.name }}
+                            </span>
+                            {% empty %}
+                            <span class="text-gray-500">No tags</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Похожие треки -->
+    <div class="mt-8">
+        <h2 class="text-2xl font-bold mb-4">Similar Tracks</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {% for similar in similar_tracks|slice:":3" %}
+            <a href="{% url 'music:track_detail' similar.id %}"
+                class="bg-zinc-900 hover:bg-zinc-800 p-4 rounded-2xl border border-gray-700 shadow-lg transition-colors">
+                <div class="flex items-center">
+                    <div class="w-16 h-16 rounded-lg overflow-hidden mr-4">
+                        <img src="{{ similar.album.cover.url|default:'/static/images/default-cover.jpg' }}"
+                            alt="{{ similar.title }}" class="w-full h-full object-cover">
+                    </div>
+                    <div>
+                        <h3 class="font-medium text-white truncate">{{ similar.title }}</h3>
+                        <p class="text-gray-400 text-sm">
+                            {% for artist in similar.artists.all|slice:":2" %}
+                            {{ artist.name }}{% if not forloop.last %}, {% endif %}
+                            {% endfor %}
+                        </p>
+                        <div class="text-gray-500 text-xs mt-1">
+                            {{ similar.tracks_metadata.duration }} • {{ similar.album.title }}
+                        </div>
+                    </div>
+                </div>
+            </a>
+            {% empty %}
+            <div class="md:col-span-3 text-center py-8 text-gray-500">
+                <svg class="w-12 h-12 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <p>No similar tracks found</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Кнопка воспроизведения
+        const playButton = document.getElementById('play-track-btn');
+        const playIcon = document.getElementById('play-icon');
+        const playText = document.getElementById('play-text');
+        let isPlaying = false;
+
+        playButton.addEventListener('click', function () {
+            if (!isPlaying) {
+                // Отправляем событие плееру
+                const trackData = {
+                    id: this.dataset.trackId,
+                    title: this.dataset.trackTitle,
+                    artist: this.dataset.artist,
+                    coverUrl: this.dataset.coverUrl,
+                    playlistUrl: this.dataset.playlistUrl
+                };
+
+                const event = new CustomEvent('playTrack', {
+                    detail: trackData
+                });
+                document.dispatchEvent(event);
+
+                // Меняем иконку
+                playIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>`;
+                playText.textContent = 'Playing...';
+                isPlaying = true;
+            } else {
+                // Отправляем событие паузы
+                document.dispatchEvent(new Event('pauseTrack'));
+
+                // Возвращаем иконку воспроизведения
+                playIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>`;
+                playText.textContent = 'Play Track';
+                isPlaying = false;
+            }
+        });
+
+        // Переключение текста песни
+        const toggleLyrics = document.getElementById('toggle-lyrics');
+        const lyricsContainer = document.getElementById('lyrics-container');
+
+        toggleLyrics.addEventListener('click', function () {
+            lyricsContainer.classList.toggle('hidden');
+            this.textContent = lyricsContainer.classList.contains('hidden') ? 'Show Lyrics' : 'Hide Lyrics';
+        });
+
+        // Слушаем события от плеера
+        document.addEventListener('trackEnded', function () {
+            playIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>`;
+            playText.textContent = 'Play Track';
+            isPlaying = false;
+        });
+
+    });
+</script>
+
+<style>
+    .play-button {
+        transition: all 0.3s ease;
+    }
+
+    .prose {
+        line-height: 1.75;
+    }
+
+    .prose p {
+        margin-bottom: 1.5em;
+    }
+
+    #lyrics-container {
+        max-height: 500px;
+        overflow-y: auto;
+    }
+
+    #lyrics-container::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    #lyrics-container::-webkit-scrollbar-track {
+        background: #1a1a1a;
+        border-radius: 3px;
+    }
+
+    #lyrics-container::-webkit-scrollbar-thumb {
+        background: #e11d48;
+        border-radius: 3px;
+    }
+
+    .track-info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1.5rem;
+    }
+
+    @keyframes pulse {
+        0% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.05);
+        }
+
+        100% {
+            transform: scale(1);
+        }
+    }
+
+    .playing .play-icon {
+        animation: pulse 1.5s infinite;
+    }
+</style>
+{% endblock %}

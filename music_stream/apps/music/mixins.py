@@ -22,8 +22,10 @@ class UserManageArtist(LoginRequiredMixin):
     def dispatch(self, request: HttpRequest, *args: typing.Any, **kwargs: typing.Any) -> HttpResponseBase:
         service = services.ArtistService()
         artist_id = kwargs.get("artist_id")
+
         if artist_id:
-            artist = service.fetch_artist_by_user_id(request.user.id)  # type: ignore
-            if artist and artist_id == artist.id:
+            self.artist = service.fetch_artist_by_user_id(request.user.id)  # type: ignore
+
+            if self.artist and (artist_id == self.artist.id):
                 return super().dispatch(request, *args, **kwargs)
         return self.handle_no_permission()

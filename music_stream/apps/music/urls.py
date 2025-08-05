@@ -30,4 +30,6 @@ urlpatterns = [
     path("update-album/<int:album_id>/", views.AlbumUpdateView.as_view(), name="update_album"),
     path("album/<int:album_id>/", views.AlbumDetailView.as_view(), name="album_detail"),
     path("manage/artist/<int:artist_id>/", views.ManageArtistView.as_view(), name="manage_artist"),
+    path("create-track/", views.TrackCreateView.as_view(), name="create_track"),
+    path("track/<int:track_id>", views.TrackDetailView.as_view(), name="track_detail"),
 ]

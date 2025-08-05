@@ -103,7 +103,7 @@ class Album(Music):
 
 
 class Track(Music):
-    cover = models.ImageField(upload_to="music_covers/", verbose_name="Обложка")
+    cover = models.ImageField(upload_to="music_covers/", verbose_name="Обложка", null=False)
     audio_file = models.FileField(upload_to="tracks/")
     hls_playlist = models.FileField(upload_to="tracks/", null=True)
     release_date = models.DateTimeField(null=True, verbose_name="Дата релиза")
@@ -124,7 +124,7 @@ class Track(Music):
     @property
     def hls_presigned_playlist_url(self) -> str:
         minio = MinioClient()
-        return minio.fetch_presigned_track_hsl_playlist_url(self.hls_playlist.name)
+        return minio.fetch_presigned_track_hls_playlist_url(self.hls_playlist.name)
 
 
 class Playlist(Music):
