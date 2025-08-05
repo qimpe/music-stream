@@ -122,14 +122,39 @@
         </div>
     </div>
 </div>
-
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         // Функция для воспроизведения трека
-        function playTrack(trackData) {
-            // Отправляем событие глобальному плееру
-            const event = new CustomEvent('playTrack', {
+        function playSingleTrack(trackData) {
+            // Отправляем событие плееру
+            const event = new CustomEvent('playSingleTrack', {
                 detail: trackData
+            });
+            document.dispatchEvent(event);
+        }
+
+        // Функция для воспроизведения альбома
+        function playAlbum(albumId) {
+            const tracks = [];
+
+            // Собираем все треки альбома
+            document.querySelectorAll('.play-track').forEach(button => {
+                tracks.push({
+                    id: button.dataset.trackId,
+                    title: button.dataset.trackTitle,
+                    artist: button.dataset.artist,
+                    coverUrl: button.dataset.coverUrl,
+                    playlistUrl: button.dataset.playlistUrl,
+                    duration: button.dataset.duration
+                });
+            });
+
+            // Отправляем событие для воспроизведения альбома
+            const event = new CustomEvent('playAlbum', {
+                detail: {
+                    albumId: albumId,
+                    tracks: tracks
+                }
             });
             document.dispatchEvent(event);
         }
@@ -145,23 +170,14 @@
                     playlistUrl: this.dataset.playlistUrl,
                     duration: this.dataset.duration
                 };
-                playTrack(trackData);
+                playSingleTrack(trackData);
             });
         });
 
         // Кнопка "Play Album"
         document.querySelector('.play-all').addEventListener('click', function () {
-            const firstTrack = document.querySelector('.play-track');
-            if (firstTrack) {
-                const trackData = {
-                    id: firstTrack.dataset.trackId,
-                    title: firstTrack.dataset.trackTitle,
-                    artist: firstTrack.dataset.artist,
-                    coverUrl: firstTrack.dataset.coverUrl,
-                    playlistUrl: firstTrack.dataset.playlistUrl
-                };
-                playTrack(trackData);
-            }
+            const albumId = this.dataset.albumId;
+            playAlbum(albumId);
         });
     });
 </script>
