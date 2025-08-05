@@ -21,11 +21,11 @@ from django.contrib import admin
 from django.urls import include, path
 
 urlpatterns = [
-    path("", include("music.urls")),
+    path("", include("apps.music.urls")),
     path("admin/", admin.site.urls),
-    path("users/", include("users.urls")),
-    path("oauth2/", include("oauth.urls")),
-    path("", include("track_stream.urls")),
+    path("users/", include("apps.users.urls")),
+    path("oauth2/", include("apps.oauth.urls")),
+    path("", include("apps.track_processing.urls")),
     *debug_toolbar_urls(),
     path("__reload__/", include("django_browser_reload.urls")),
 ]

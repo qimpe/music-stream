@@ -1,11 +1,10 @@
 import typing
 
+from config.minio import MinioClient
 from django.contrib.auth.models import User
 from django.db import models
 from django.utils.text import slugify
 from django_stubs_ext.db.models import TypedModelMeta
-
-from music_stream.minio import MinioClient
 
 
 # Create your models here.

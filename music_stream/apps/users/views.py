@@ -10,17 +10,17 @@ from .forms import SignInForm, SignUpForm
 
 
 class SignUpView(CreateView):
-    """Представление регистарции аккаунта."""
+    """Представление регистрации аккаунта."""
 
     form_class = SignUpForm
-    template_name = "users/sign_up.html"
+    template_name = "apps/users/sign_up.html"
 
 
 class SignInView(LoginView):
     """Представление входа из аккаунта."""
 
     form_class = SignInForm
-    template_name = "users/sign_in.html"
+    template_name = "apps/users/sign_in.html"
     redirect_authenticated_user = True
 
 
@@ -34,7 +34,7 @@ class ProfileDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     model = User
     pk_url_kwarg = "user_id"
     context_object_name = "user"
-    template_name = "users/user_detail.html"
+    template_name = "apps/users/user_detail.html"
 
     def test_func(self) -> bool | None:
         """Проверка является ли пользователь владельцем аккаунта."""

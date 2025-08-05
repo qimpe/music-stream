@@ -1,5 +1,30 @@
 services:
+
+
+  celery:
+    image: celery:latest
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - DJANGO_SETTINGS_MODULE=config.settings.dev
+    depends_on:
+      - redis
+  vault:
+    labels:
+        logging: promtail
+    image: vault:1.13.3
+    container_name: vault
+    ports:
+      - "8200:8200"
+    volumes:
+      - vault-data:/vault/data
+    environment:
+      VAULT_DEV_ROOT_TOKEN_ID: "root-token"  # Только для разработки!
+      VAULT_ADDR: "http://0.0.0.0:8200"
+    cap_add:
+      - IPC_LOCK
   minio: 
+    labels:
+        logging: promtail
     image: minio/minio:RELEASE.2025-07-23T15-54-02Z-cpuv1
     container_name: minio
     command: server --console-address ":9001" /data/
@@ -11,13 +36,30 @@ services:
       MINIO_ROOT_PASSWORD: pass12345
     volumes:
       - minio-storage:/data
+  postgres:
+    labels:
+      logging: promtail
+    image: postgres:latest
+    volumes:
+      - postgres-storage:/var/lib/postgresql/data/
+    environment:
+      POSTGRES_DB: music
+      POSTGRES_USER: qimpe
+      POSTGRES_PASSWORD: restart123
+    ports:
+      - "5432:5432"
+
 
   redis:
+    labels:
+      logging: promtail
     image: redis
     ports:
       - "6379:6379"
 
   nginx:
+    labels:
+      logging: promtail
     image: nginx:stable-alpine
     container_name: nginx
     ports:
@@ -29,5 +71,9 @@ services:
   
 
 volumes:
- minio-storage:
- postgres-storage:
+  grafanadata:
+  prometheusdata:
+  minio-storage:
+  postgres-storage:
+  vault-data:
+ 

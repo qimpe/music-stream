@@ -34,7 +34,7 @@ class ArtistCreateView(UserHasArtist, CreateView):
     model = Artist
     form_class = ArtistCreateForm
     success_url = "music:artist_detail"
-    template_name = "music/create_artist.html"
+    template_name = "apps/music/create_artist.html"
 
     def form_valid(self, form: ArtistCreateForm) -> HttpResponse:
         artist_service = services.ArtistService()
@@ -52,7 +52,7 @@ class ArtistDetailView(DetailView):
     model = Artist
     pk_url_kwarg = "artist_id"
     context_object_name = "artist"
-    template_name = "music/artist_detail.html"
+    template_name = "apps/music/artist_detail.html"
 
     def get_queryset(self) -> QuerySet[Artist]:
         artist_service = services.ArtistService()
@@ -72,7 +72,7 @@ class ArtistDetailView(DetailView):
 class ManageArtistView(UserManageArtist, View):
     """Страница управления артистом доступная только пользователю,который им обладает."""
 
-    template_name = "music/manage_artist.html"
+    template_name = "apps/music/manage_artist.html"
 
     def get(self, request: HttpRequest, *args: typing.Any, **kwargs: typing.Any) -> HttpResponse:
         artist_id = self.kwargs.get("artist_id")
@@ -87,7 +87,7 @@ class AlbumCreateView(LoginRequiredMixin, CreateView):
 
     model = Album
     form_class = AlbumForm
-    template_name = "music/create_album.html"
+    template_name = "apps/music/create_album.html"
 
     def get_context_data(self, **kwargs: typing.Any) -> dict[str, typing.Any]:
         context = super().get_context_data(**kwargs)
@@ -134,7 +134,7 @@ class AlbumDeleteView(LoginRequiredMixin, DeleteView):
     model = Album
     pk_url_kwarg = "album_id"
     success_url = reverse_lazy("music:index")
-    template_name = "music/album_confirm_delete.html"
+    template_name = "apps/music/album_confirm_delete.html"
 
     def form_valid(self, form: typing.Any) -> HttpResponse:
         album_id = self.kwargs.get("album_id")
@@ -149,7 +149,7 @@ class AlbumUpdateView(LoginRequiredMixin, UpdateView):
     model = Album
     form_class = AlbumForm
     pk_url_kwarg = "album_id"
-    template_name = "music/update_album.html"
+    template_name = "apps/music/update_album.html"
     success_url = "music:index"
 
     def dispatch(self, request: HttpRequest, *args, **kwargs) -> HttpResponseRedirect | HttpResponseBase:
@@ -169,7 +169,7 @@ class AlbumUpdateView(LoginRequiredMixin, UpdateView):
 class AlbumDetailView(DetailView):
     model = Album
     pk_url_kwarg = "album_id"
-    template_name = "music/album_detail.html"
+    template_name = "apps/music/album_detail.html"
     success_url = "music:index"
 
     def get_object(self, queryset: QuerySet | None = ...) -> typing.Any:  # pyright: ignore[reportArgumentType]

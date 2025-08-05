@@ -27,6 +27,7 @@ dependencies = [
     "pytest-django>=4.11.1",
     "pytest-mock>=3.14.1",
     "python-dotenv>=1.1.1",
+    "redis>=6.3.0",
     "requests>=2.32.4",
     "vulture>=2.14",
 ]
@@ -60,6 +61,8 @@ ignore = [
     "ANN401",    # Использование Any
     "RUF012", # typing.ClassVar
     "ARG002",
+    "F403", #import *
+    "RUF001",
    
 ]
 

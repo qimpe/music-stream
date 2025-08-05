@@ -19,7 +19,7 @@ class MinioClient:
             secure=False,
         )
 
-    def fetch_presigned_track_hsl_playlist_url(self, object_name: str) -> str:
+    def fetch_presigned_track_hls_playlist_url(self, object_name: str) -> str:
         """возвращает подписанный url плейлиста для трека."""
         return self.client.presigned_get_object(
             settings.MINIO_STORAGE_MEDIA_BUCKET_NAME, object_name, expires=timedelta(minutes=15)

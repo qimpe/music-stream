@@ -83,7 +83,7 @@ class TrackInAlbumForm(forms.ModelForm):
         required=True,
         min_value=1,  # Устанавливаем минимальное значение
         label="Позиция",
-        help_text="Позиция трека в альбоме (начиная с 1)",
+        help_text="Позиция трека в альбоме (начиная c 1)",
         initial=1,
     )
     genre = forms.CharField(max_length=50)

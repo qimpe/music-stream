@@ -2,7 +2,7 @@ from django.http import HttpRequest, HttpResponse
 from django.views.generic import View
 from dotenv import load_dotenv
 
-from .hls_track_convertor import TrackConvertorHLS
+from .services import TrackConvertorHLS
 
 load_dotenv()
 

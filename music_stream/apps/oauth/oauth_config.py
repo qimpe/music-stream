@@ -5,10 +5,11 @@ from typing import Literal, Optional, TypedDict, TypeVar
 
 import jwt
 import requests
+from apps.users.services import UserService
+from config.settings import constants
 from django.contrib.auth.models import User
 from dotenv import load_dotenv
 from requests.adapters import Response
-from users.services import UserService
 
 load_dotenv()
 
@@ -24,6 +25,7 @@ class GoogleProviderParamsConfig(TypedDict):
     response_type: str
     scope: str
     access_type: str
+    prompt: str
 
 
 class GithubProviderParamsConfig(TypedDict):
@@ -52,15 +54,15 @@ class OAuthConfig:
             "CLIENT_SECRET": os.getenv("OAUTH_GITHUB_CLIENT_SECRET", ""),
             "CLIENT_ID": os.getenv("OAUTH_GITHUB_CLIENT_ID", ""),
             "TOKEN_URI": "https://github.com/login/oauth/access_token",
-            "BASE_REDIRECT_URI": "http://localhost:8000/oauth2/github/callback",
-            "BASE_URL": "https://github.com/login/oauth/authorize",
+            "BASE_REDIRECT_URI": constants.GITHUB_OAUTH_REDIRECT_URI,
+            "BASE_URL": constants.GITHUB_OAUTH_BASE_URL,
         },
         "google": {
             "CLIENT_SECRET": os.getenv("OAUTH_GOOGLE_CLIENT_SECRET", ""),
             "CLIENT_ID": os.getenv("OAUTH_GOOGLE_CLIENT_ID", ""),
             "TOKEN_URI": "https://oauth2.googleapis.com/token",
-            "BASE_REDIRECT_URI": "http://localhost:8000/oauth2/google/callback",
-            "BASE_URL": "https://accounts.google.com/o/oauth2/v2/auth",
+            "BASE_REDIRECT_URI": constants.GOOGLE_OAUTH_REDIRECT_URI,
+            "BASE_URL": constants.GOOGLE_OAUTH_BASE_URL,
         },
     }
 
@@ -141,6 +143,7 @@ class GoogleOAuthOperations(OAuthOperations):
             "response_type": "code",
             "scope": "openid profile email",
             "access_type": "offline",
+            "prompt": "select_account",
         }
 
     def fetch_redirect_url(self) -> str:
@@ -168,7 +171,7 @@ class GoogleOAuthOperations(OAuthOperations):
         return None
 
     def get_headers_for_access_token_request(self) -> dict:
-        return super().get_headers_for_access_token_request()
+        return {"Content-Type": "application/x-www-form-urlencoded"}
 
 
 # TODO make a state

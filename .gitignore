@@ -18,3 +18,5 @@ wheels/
 /music_stream/htmlcov
 /music_stream/apps/theme/static_src/node_modules
 /.env
+/music_stream/staticfiles
+/music_stream/config/db.sqlite3
