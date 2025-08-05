@@ -10,5 +10,4 @@ load_dotenv()
 class TrackStream(View):
     def get(self, request: HttpRequest, track_id: int) -> HttpResponse:
         service = TrackConvertorHLS()
-        a = service.convert_track(track_id)
-        print(a)
+        service.convert_track(track_id)

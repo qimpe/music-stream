@@ -4,9 +4,10 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 load_dotenv()
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
 
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+
+print(f"{BASE_DIR=}")
 
 SECRET_KEY = os.getenv("APP_KEY")
 
@@ -117,12 +118,18 @@ USE_L10N = True
 USE_TZ = True
 
 TAILWIND_APP_NAME = "apps.theme"
+TAILWIND_CONTENT_PATHS = [
+    str(BASE_DIR / "theme/templates/**/*.html"),
+    str(BASE_DIR / "apps" / "**" / "templates" / "**" / "*.html"),
+    str(BASE_DIR / "apps" / "**" / "*.py"),
+]
 INTERNAL_IPS = ["127.0.0.1"]
 
 
-STATIC_URL = "/static/"
-STATICFILES_DIRS = [BASE_DIR / "static"]
-STATIC_ROOT = BASE_DIR / "staticfiles"
-
-MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "media"
+# Celery Configuration
+CELERY_BROKER_URL = "redis://localhost:6379/0"
+CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TIMEZONE = "UTC"

@@ -13,6 +13,18 @@ STORAGES = {
     },
 }
 
+
+STATIC_URL = "/static/"
+
+# Для разработки: где искать статические файлы
+STATICFILES_DIRS = [
+    BASE_DIR / "static",  # Основная папка со статикой
+    BASE_DIR / "apps/theme/static_src",  # Исходники Tailwind
+]
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
+
+
 MINIO_STORAGE_USE_HTTPS = False
 MINIO_STORAGE_SECURE = False
 
@@ -42,11 +54,3 @@ MINIO_SECRET_KEY = "pass12345"
 
 # * Для tailwind
 NPM_BIN_PATH = "C:/Program Files/nodejs/npm.cmd"
-
-
-CELERY_BROKER_URL = "redis://localhost:6379/0"
-CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
-CELERY_ACCEPT_CONTENT = ["json"]
-CELERY_TASK_SERIALIZER = "json"
-CELERY_RESULT_SERIALIZER = "json"
-CELERY_TIMEZONE = "UTC"

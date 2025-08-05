@@ -4,7 +4,6 @@ import tempfile
 from pathlib import Path
 
 from apps.music.models import Track
-from apps.music.services import TrackService
 from config.minio import MinioClient
 from django.conf import settings
 
@@ -14,6 +13,8 @@ class TrackConvertorHLS:
 
     def convert_track(self, track_id: int) -> str:
         """Преобразует трек в сегменты для hls stream."""
+        from apps.music.services import TrackService
+
         minio = MinioClient()
         service = TrackService()
         track = service.fetch_track_by_id(track_id)
@@ -66,6 +67,8 @@ class TrackConvertorHLS:
 
     def _upload_hls_to_minio(self, track: Track, output_dir: Path) -> str:
         """Загружает HLS файлы в MinIO и возвращает URL плейлиста."""
+        from apps.music.services import TrackService
+
         minio = MinioClient()
         minio_base_path = f"tracks/{track.pk}/hls"
         # Загружаем все файлы в директории

@@ -1,6 +1,8 @@
 import typing
 
 import mutagen
+from apps.track_processing.tasks import process_track
+from celery import group
 from django.core.exceptions import PermissionDenied
 from django.core.files.storage import default_storage
 from django.db import transaction
@@ -83,11 +85,12 @@ class AlbumService:
                 genre_album_service.link_genre_with_album(album.id, genre.id)
             print(track_formset.data)
             # track_genre_service.create_tracks_genres(track_list)
-
             tracks_with_positions = track_service.create_track_from_formset(track_formset)
             tracks_data = [track for track, position in tracks_with_positions]
             tracks = Track.objects.bulk_create(tracks_data)
-
+            track_ids = [track.id for track in tracks]
+            job = group(process_track.s(track_id) for track_id in track_ids)
+            job.apply_async()
             album_artist.create_artist_album(artist, album)
             track_in_album.add_tracks_in_album(tracks_with_positions, album)
             track_service.create_metadata_for_tracks_list(tracks)

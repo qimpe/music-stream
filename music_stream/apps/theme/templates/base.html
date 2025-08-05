@@ -10,91 +10,30 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
         <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     </head>
-    <body class="flex flex-col bg-neutral-950 min-h-screen">
+    <body class="flex flex-col bg-neutral-950 min-h-screen h-full">
         <!-- Обертка с отступами -->
-        <div class="flex-1 w-full h-full flex flex-col md:flex-row p-4 gap-4">
+        <div class="flex-1 flex w-full p-4 gap-4 h-full">
             <!-- Навигация -->
-            <div class="flex md:h-full w-full md:w-64">
+            <div class="flex flex-col h-full w-full md:w-64">
                 {% include "partials/navbar.html" %}
             </div>
 
-            <!-- Основной контент -->
-            <div class="flex-1 flex flex-col min-h-0 gap-4">
+            <!-- Основной контент: исправленный контейнер -->
+            <div class="flex-1 flex flex-col min-h-0 h-full">
                 <main class="flex-1 min-h-0 border border-gray-500 bg-zinc-950 rounded-2xl overflow-auto">
                     {% block content %}{% endblock %}
                 </main>
-                {% include "partials/player.html" %}
+
+                <!-- Контейнер для плеера - прижат к низу -->
+                <div class="mt-auto pt-4 sticky bottom-0 bg-zinc-950 z-10">
+                    {% if user.is_authenticated %}
+                    {% include "partials/player.html" %}
+                    {% endif %}
+                </div>
             </div>
         </div>
         <!-- Уведомления (Toasts) -->
-        <div class="fixed top-4 right-4 z-50 w-80 space-y-3">
-            {% for message in messages %}
-            <div id="toast-{{ forloop.counter }}" class="animate-slide-in-right rounded-xl border-l-4 shadow-lg p-4 transition-all duration-300
-                    {% if message.tags == 'success' %} 
-                        bg-green-900/80 border-green-500 text-green-200
-                    {% elif message.tags == 'error' %}
-                        bg-rose-900/80 border-rose-500 text-rose-200
-                    {% elif message.tags == 'warning' %}
-                        bg-yellow-900/80 border-yellow-500 text-yellow-200
-                    {% else %}
-                        bg-blue-900/80 border-blue-500 text-blue-200
-                    {% endif %}">
-                <div class="flex items-start">
-                    <!-- Иконка -->
-                    <div class="flex-shrink-0 mr-3">
-                        {% if message.tags == 'success' %}
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                        {% elif message.tags == 'error' %}
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                        {% elif message.tags == 'warning' %}
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
-                            </path>
-                        </svg>
-                        {% else %}
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                        {% endif %}
-                    </div>
-
-                    <!-- Текст -->
-                    <div class="flex-1">
-                        <p class="font-medium">
-                            {% if message.tags == 'success' %}
-                            Успех!
-                            {% elif message.tags == 'error' %}
-                            Ошибка!
-                            {% elif message.tags == 'warning' %}
-                            Внимание!
-                            {% else %}
-                            Информация
-                            {% endif %}
-                        </p>
-                        <p class="mt-1 text-sm">{{ message }}</p>
-                    </div>
-
-                    <!-- Кнопка закрытия -->
-                    <button type="button" class="ml-2 text-gray-300 hover:text-white"
-                        onclick="dismissToast('toast-{{ forloop.counter }}')">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M6 18L18 6M6 6l12 12">
-                            </path>
-                        </svg>
-                    </button>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-        <script src="{% static 'js/player.js' %}"></script>
+        {% include "partials/messages.html" %}
+        <script src="{{'apps/theme/static_src/src/js/player.js' }}"></script>
     </body>
 </html>
