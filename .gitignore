@@ -20,3 +20,4 @@ wheels/
 /.env
 /music_stream/staticfiles
 /music_stream/config/db.sqlite3
+/music_stream/db.sqlite3
