@@ -87,7 +87,7 @@ class AlbumService:
             tracks_with_positions = track_service.create_track_from_formset(track_formset)
             tracks_data = [track for track, position in tracks_with_positions]
             tracks = Track.objects.bulk_create(tracks_data)
-            [track.id for track in tracks]
+            process_track.delay(tracks[0].pk)
             album_artist.create_artist_album(artist, album)
             track_in_album.add_tracks_in_album(tracks_with_positions, album)
             track_service.create_metadata_for_tracks_list(tracks)

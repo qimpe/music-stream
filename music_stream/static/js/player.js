@@ -13,71 +13,43 @@ document.addEventListener('DOMContentLoaded', function () {
     const currentTrack = document.getElementById('current-track');
     const currentArtist = document.getElementById('current-artist');
 
+
+
     let currentTrackIndex = 0;
     let isPlaying = false;
     let isLiked = false;
-    let hls = null; // Добавляем HLS.js объект
 
-    // Форматирование времени
-    function formatTime(seconds) {
-        const minutes = Math.floor(seconds / 60);
-        const secs = Math.floor(seconds % 60);
-        return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
-    }
-
-    // Загрузка трека с HLS
+    // Загрузка трека
     function loadTrack(index) {
         const track = playlist[index];
-
-        // Уничтожаем предыдущий HLS-поток
-        if (hls) {
-            hls.destroy();
-            hls = null;
-        }
-
-        // Создаем новый HLS-поток
-        if (Hls.isSupported()) {
-            hls = new Hls({
-                // Ключевые настройки для загрузки по требованию
-                maxBufferLength: 30,      // Макс. длина буфера (сек)
-                maxMaxBufferLength: 60,   // Абсолютный макс. буфер
-                backBufferLength: 10,     // Буфер позади текущей позиции
-                maxBufferSize: 0,         // Автоматический размер буфера
-                enableWorker: true,       // Используем Web Worker
-                lowLatencyMode: true,      // Режим низкой задержки
-            });
-
-            hls.loadSource(track.hlsUrl); // URL плейлиста M3U8
-            hls.attachMedia(audio);
-
-            // Обработчики событий HLS
-            hls.on(Hls.Events.MANIFEST_PARSED, function () {
-                console.log("HLS manifest parsed");
-            });
-        }
-        // Для браузеров с нативной поддержкой HLS (Safari)
-        else if (audio.canPlayType('application/vnd.apple.mpegurl')) {
-            audio.src = track.hlsUrl;
-        }
-
-        // Обновляем UI
+        audio.src = track.file;
         albumCover.src = track.cover;
         currentTrack.textContent = track.title;
         currentArtist.textContent = track.artist;
+
+        // Сброс прогресса
         progressBar.value = 0;
         currentTimeElement.textContent = '0:00';
-        totalTimeElement.textContent = formatTime(track.duration);
+
+        // Обновление времени трека после загрузки метаданных
+        audio.onloadedmetadata = function () {
+            const totalMinutes = Math.floor(audio.duration / 60);
+            const totalSeconds = Math.floor(audio.duration % 60);
+            totalTimeElement.textContent = `${totalMinutes}:${totalSeconds < 10 ? '0' : ''}${totalSeconds}`;
+        };
     }
 
     // Воспроизведение/пауза
     function togglePlay() {
         if (isPlaying) {
             audio.pause();
-            playIcon.classList.replace('fa-pause', 'fa-play');
+            playIcon.classList.remove('fa-pause');
+            playIcon.classList.add('fa-play');
             player.classList.remove('playing');
         } else {
-            audio.play().catch(e => console.error("Play error:", e));
-            playIcon.classList.replace('fa-play', 'fa-pause');
+            audio.play();
+            playIcon.classList.remove('fa-play');
+            playIcon.classList.add('fa-pause');
             player.classList.add('playing');
         }
         isPlaying = !isPlaying;
@@ -85,51 +57,62 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Обновление прогресса
     function updateProgress() {
-        if (isFinite(audio.duration)) {
-            const percent = (audio.currentTime / audio.duration) * 100;
-            progressBar.value = percent;
-            currentTimeElement.textContent = formatTime(audio.currentTime);
-        }
+        const percent = (audio.currentTime / audio.duration) * 100;
+        progressBar.value = percent;
+
+        const currentMinutes = Math.floor(audio.currentTime / 60);
+        const currentSeconds = Math.floor(audio.currentTime % 60);
+        currentTimeElement.textContent = `${currentMinutes}:${currentSeconds < 10 ? '0' : ''}${currentSeconds}`;
     }
 
     // Перемотка
     function setProgress() {
-        if (isFinite(audio.duration)) {
-            const seekTime = (progressBar.value / 100) * audio.duration;
-            audio.currentTime = seekTime;
-        }
+        const seekTime = (progressBar.value / 100) * audio.duration;
+        audio.currentTime = seekTime;
     }
 
     // Управление громкостью
     function setVolume() {
         audio.volume = volumeSlider.value / 100;
-        volumeIcon.className = audio.volume === 0 ?
-            'fas fa-volume-mute' :
-            audio.volume < 0.5 ?
-                'fas fa-volume-down' :
-                'fas fa-volume-up';
+
+        if (audio.volume === 0) {
+            volumeIcon.classList.remove('fa-volume-up', 'fa-volume-down');
+            volumeIcon.classList.add('fa-volume-mute');
+        } else if (audio.volume < 0.5) {
+            volumeIcon.classList.remove('fa-volume-up', 'fa-volume-mute');
+            volumeIcon.classList.add('fa-volume-down');
+        } else {
+            volumeIcon.classList.remove('fa-volume-down', 'fa-volume-mute');
+            volumeIcon.classList.add('fa-volume-up');
+        }
     }
 
     // Переключение лайка
     function toggleLike() {
         isLiked = !isLiked;
-        likeButton.innerHTML = isLiked ?
-            '<i class="fas fa-heart text-rose-500"></i>' :
-            '<i class="far fa-heart"></i>';
+        if (isLiked) {
+            likeButton.innerHTML = '<i class="fas fa-heart text-rose-500"></i>';
+        } else {
+            likeButton.innerHTML = '<i class="far fa-heart"></i>';
+        }
     }
 
     // Следующий трек
     function nextTrack() {
         currentTrackIndex = (currentTrackIndex + 1) % playlist.length;
         loadTrack(currentTrackIndex);
-        if (isPlaying) audio.play();
+        if (isPlaying) {
+            audio.play();
+        }
     }
 
     // Предыдущий трек
     function prevTrack() {
         currentTrackIndex = (currentTrackIndex - 1 + playlist.length) % playlist.length;
         loadTrack(currentTrackIndex);
-        if (isPlaying) audio.play();
+        if (isPlaying) {
+            audio.play();
+        }
     }
 
     // Инициализация плеера
@@ -145,5 +128,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
     audio.addEventListener('timeupdate', updateProgress);
     audio.addEventListener('ended', nextTrack);
+
+    // Инициализация громкости
     setVolume();
+
+    // Показать/скрыть плеер
+
 });

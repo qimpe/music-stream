@@ -53,7 +53,9 @@
                             data-track-id="{{ track.id }}" data-track-title="{{ track.title }}"
                             data-artist="{% for artist in track.artists.all %}{{ artist.name }}{% if not forloop.last %}, {% endif %}{% endfor %}"
                             data-cover-url="{{ track.album.cover.url|default:'/static/images/default-cover.jpg' }}"
-                            data-playlist-url="{{ track.hls_presigned_playlist_url }}">
+                            data-playlist-url="{{ track.hls_presigned_playlist_url }}"
+                            data-duration="{{ track.tracks_metadata.duration|default:0 }}">
+
                             <svg id="play-icon" class="w-6 h-6 mr-2" fill="none" stroke="currentColor"
                                 viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -229,59 +231,46 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        // Кнопка воспроизведения
-        const playButton = document.getElementById('play-track-btn');
-        const playIcon = document.getElementById('play-icon');
-        const playText = document.getElementById('play-text');
-        let isPlaying = false;
+        // Функция для воспроизведения трека
+        function playTrack(trackData) {
+            // Отправляем событие глобальному плееру
+            const event = new CustomEvent('playTrack', {
+                detail: trackData
+            });
+            document.dispatchEvent(event);
+        }
 
-        playButton.addEventListener('click', function () {
-            if (!isPlaying) {
-                // Отправляем событие плееру
+        // Обработчик для кнопки воспроизведения трека
+        const playButton = document.getElementById('play-track-btn');
+        if (playButton) {
+            playButton.addEventListener('click', function () {
                 const trackData = {
                     id: this.dataset.trackId,
                     title: this.dataset.trackTitle,
                     artist: this.dataset.artist,
                     coverUrl: this.dataset.coverUrl,
-                    playlistUrl: this.dataset.playlistUrl
+                    playlistUrl: this.dataset.playlistUrl,
+                    duration: this.dataset.duration
                 };
+                playTrack(trackData);
 
-                const event = new CustomEvent('playTrack', {
-                    detail: trackData
-                });
-                document.dispatchEvent(event);
-
-                // Меняем иконку
+                // Обновляем UI (опционально)
+                const playIcon = document.getElementById('play-icon');
+                const playText = document.getElementById('play-text');
                 playIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>`;
                 playText.textContent = 'Playing...';
-                isPlaying = true;
-            } else {
-                // Отправляем событие паузы
-                document.dispatchEvent(new Event('pauseTrack'));
+            });
+        }
 
-                // Возвращаем иконку воспроизведения
+        // Слушаем события окончания трека от глобального плеера
+        document.addEventListener('trackEnded', function () {
+            const playIcon = document.getElementById('play-icon');
+            const playText = document.getElementById('play-text');
+            if (playIcon && playText) {
                 playIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>`;
                 playText.textContent = 'Play Track';
-                isPlaying = false;
             }
         });
-
-        // Переключение текста песни
-        const toggleLyrics = document.getElementById('toggle-lyrics');
-        const lyricsContainer = document.getElementById('lyrics-container');
-
-        toggleLyrics.addEventListener('click', function () {
-            lyricsContainer.classList.toggle('hidden');
-            this.textContent = lyricsContainer.classList.contains('hidden') ? 'Show Lyrics' : 'Hide Lyrics';
-        });
-
-        // Слушаем события от плеера
-        document.addEventListener('trackEnded', function () {
-            playIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>`;
-            playText.textContent = 'Play Track';
-            isPlaying = false;
-        });
-
     });
 </script>
 
