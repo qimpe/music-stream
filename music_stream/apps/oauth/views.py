@@ -29,7 +29,7 @@ class OAuthCallback(View):
     """Google OAuth обработчик."""
 
     success_url = reverse_lazy("music:index")
-    unsuccess_url = reverse_lazy("users:sign_in")
+    # unsuccess_url = reverse_lazy("users:sign_in")
 
     def get(self, request: HttpRequest, provider: OAuthProvider) -> HttpResponse:
         factory = OAuthFactory.fetch_oauth_provider(provider)
@@ -50,4 +50,6 @@ class OAuthCallback(View):
                 messages.success(request, f"Добро пожаловать, {user.username}!")
                 return HttpResponseRedirect(self.success_url)
         messages.error(request, f"Произошла ошибка при использовании {provider}")
-        return HttpResponseRedirect(self.unsuccess_url)
+        msg = "Нет Email"
+        raise ValueError(msg)
+        # return HttpResponseRedirect(self.unsuccess_url)

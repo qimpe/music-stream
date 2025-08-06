@@ -25,7 +25,6 @@ class GoogleProviderParamsConfig(TypedDict):
     response_type: str
     scope: str
     access_type: str
-    prompt: str
 
 
 class GithubProviderParamsConfig(TypedDict):
@@ -34,6 +33,7 @@ class GithubProviderParamsConfig(TypedDict):
     client_id: str
     redirect_uri: str
     scope: str
+    prompt: str
 
 
 class ProviderConfig(TypedDict):
@@ -143,7 +143,6 @@ class GoogleOAuthOperations(OAuthOperations):
             "response_type": "code",
             "scope": "openid profile email",
             "access_type": "offline",
-            "prompt": "select_account",
         }
 
     def fetch_redirect_url(self) -> str:
@@ -193,7 +192,8 @@ class GithubOAuthOperations(OAuthOperations):
         return {
             "client_id": self.config["CLIENT_ID"],
             "redirect_uri": self.config["BASE_REDIRECT_URI"],
-            "scope": "user",
+            "scope": "user:email",
+            "prompt": "select_account",
         }
 
     def fetch_redirect_url(self) -> str:
@@ -209,19 +209,26 @@ class GithubOAuthOperations(OAuthOperations):
         }
 
     def process_data_after_code_exchange(self, response: Response) -> User | None:
-        access_token = response.json().get("access_token")
-        user_data = requests.get(
-            "https://api.github.com/user",
-            headers={"Authorization": f"Bearer {access_token}"},
-            timeout=5,
-        ).json()
-        user_service = UserService()
-        if email := not user_data.get("email"):
+        try:
+            access_token = response.json().get("access_token")
+            print(f"{access_token=}")
+            user_data = requests.get(
+                "https://api.github.com/user",
+                headers={"Authorization": f"Bearer {access_token}"},
+                timeout=5,
+            ).json()
+            with open("temp.json", "w+") as file:
+                file.write(str(user_data))
+            user_service = UserService()
+            if email := not user_data.get("email", ValueError):
+                msg = "no email"
+                raise ValueError(msg)
+            kwargs = {"email": email, "username": user_data.get("login")}
+            if user := user_service.get_or_create_user(**kwargs):
+                return user
             return None
-        kwargs = {"email": email, "username": user_data.get("login")}
-        if user := user_service.get_or_create_user(**kwargs):
-            return user
-        return None
+        except Exception as e:
+            print(e)
 
     def get_headers_for_access_token_request(self) -> dict:
         """Добавляет заголовки для запроса на access_token."""
