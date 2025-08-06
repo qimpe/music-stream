@@ -4,6 +4,63 @@ DEBUG = True
 ALLOWED_HOSTS = ["*"]
 
 
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "colored_console": {
+            "()": "apps.core.logger.formatters.ColoredFormatter",
+            "format": "{levelname} {asctime} {module} {message}",
+            "style": "{",
+        },
+        "plain_file": {
+            "format": "{levelname} {asctime} {module} {message}",
+            "style": "{",
+        },
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "colored_console",
+        },
+        "file": {
+            "class": "logging.handlers.TimedRotatingFileHandler",
+            "filename": "logs.log",
+            "when": "midnight",
+            "backupCount": 7,
+            "formatter": "plain_file",  # Без цветов для файла
+            "encoding": "utf-8",
+        },
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
+        },
+        "django.utils.autoreload": {
+            "handlers": ["console"],
+            "level": "INFO",  # Понижаем уровень для autoreload
+            "propagate": False,
+        },
+        "apps": {
+            "handlers": ["file"],
+            "level": "DEBUG",
+            "propagate": False,
+        },
+        "middleware": {
+            "handlers": ["file"],
+            "level": "DEBUG",
+            "propagate": False,
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "ERROR",  # Исправлено: ERROR вместо error
+    },
+}
+
+
 STORAGES = {
     "default": {
         "BACKEND": "minio_storage.MinioMediaStorage",

@@ -2,13 +2,13 @@ import typing
 from itertools import chain
 
 import mutagen
-from apps.track_processing.tasks import process_track
 from django.core.exceptions import PermissionDenied
 from django.core.files.storage import default_storage
 from django.db import transaction
 from django.db.models import QuerySet, Sum
 from django.http.request import HttpRequest
 
+from apps.track_processing.tasks import process_track
 from .forms import AlbumForm, ArtistCreateForm, TrackCreateForm
 from .models import (
     Album,

@@ -63,6 +63,7 @@ ignore = [
     "ARG002",
     "F403", #import *
     "RUF001",
+    "G004", #использование f строк в logging
    
 ]
 

@@ -1,3 +1,4 @@
+import logging
 import os
 import urllib.parse
 from abc import ABC, abstractmethod
@@ -5,14 +6,15 @@ from typing import Literal, Optional, TypedDict, TypeVar
 
 import jwt
 import requests
-from apps.users.services import UserService
 from config.settings import constants
 from django.contrib.auth.models import User
 from dotenv import load_dotenv
 from requests.adapters import Response
 
-load_dotenv()
+from apps.users.services import UserService
 
+load_dotenv()
+logger = logging.getLogger(__name__)
 
 OAuthProvider = Literal["github", "google"]
 
@@ -158,6 +160,7 @@ class GoogleOAuthOperations(OAuthOperations):
         }
 
     def process_data_after_code_exchange(self, response: Response) -> User | None:
+        logger.info(response.json())
         id_token = response.json().get("id_token")
         user_data = jwt.decode(
             id_token,
@@ -209,26 +212,20 @@ class GithubOAuthOperations(OAuthOperations):
         }
 
     def process_data_after_code_exchange(self, response: Response) -> User | None:
-        try:
-            access_token = response.json().get("access_token")
-            print(f"{access_token=}")
-            user_data = requests.get(
-                "https://api.github.com/user",
-                headers={"Authorization": f"Bearer {access_token}"},
-                timeout=5,
-            ).json()
-            with open("temp.json", "w+") as file:
-                file.write(str(user_data))
-            user_service = UserService()
-            if email := not user_data.get("email", ValueError):
-                msg = "no email"
-                raise ValueError(msg)
-            kwargs = {"email": email, "username": user_data.get("login")}
-            if user := user_service.get_or_create_user(**kwargs):
-                return user
+        access_token = response.json().get("access_token")
+        user_data = requests.get(
+            "https://api.github.com/user",
+            headers={"Authorization": f"Bearer {access_token}"},
+            timeout=5,
+        ).json()
+        user_service = UserService()
+        if email := not user_data.get("email"):
             return None
-        except Exception as e:
-            print(e)
+        {"email": email, "username": user_data.get("login")}
+        user_service = UserService()
+        if (email := user_data.get("email")) and (user := user_service.get_or_create_user(email)):
+            return user
+        return None
 
     def get_headers_for_access_token_request(self) -> dict:
         """Добавляет заголовки для запроса на access_token."""

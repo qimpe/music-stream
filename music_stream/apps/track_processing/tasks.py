@@ -1,6 +1,6 @@
-from apps.music.models import Track
 from celery import shared_task
 
+from apps.music.models import Track
 from .services import TrackConvertorHLS
 
 

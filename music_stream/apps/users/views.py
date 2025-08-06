@@ -42,7 +42,7 @@ class ProfileDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
             return True
         return None
 
-    def get_object(self, queryset: services.QuerySet | None = ...) -> typing.Any:
+    def get_object(self, queryset: services.QuerySet | None = ...) -> typing.Any:  # pyright: ignore[reportArgumentType]
         self.object = self.request.user
         return self.object
 

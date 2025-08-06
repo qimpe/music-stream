@@ -1,7 +1,8 @@
-from apps.music.models import Artist
-from apps.music.services import ArtistService
 from django.contrib.auth.models import User
 from django.db.models.query import QuerySet
+
+from apps.music.models import Artist
+from apps.music.services import ArtistService
 
 
 class UserService:
