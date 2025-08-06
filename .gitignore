@@ -5,7 +5,7 @@ build/
 dist/
 wheels/
 *.egg-info
-
+**db.sqlite3
 # Virtual environments
 .venv
 /music_stream/.mypy_cache
@@ -13,11 +13,7 @@ wheels/
 /.pytest_cache
 /music_stream/.pytest_cache
 /music_stream/.coverage
+/music_stream/db.sqlite3
 /music_stream/.coveragerc
-
-/music_stream/htmlcov
-/music_stream/apps/theme/static_src/node_modules
-/.env
-/music_stream/staticfiles
-/music_stream/config/db.sqlite3
+/music_stream/theme/static_src/node_modules
 /music_stream/db.sqlite3
