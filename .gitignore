@@ -14,10 +14,12 @@ wheels/
 /music_stream/.pytest_cache
 /music_stream/.coverage
 /music_stream/.coveragerc
+/music_stream/db.sqlite3
 
 /music_stream/htmlcov
 /music_stream/apps/theme/static_src/node_modules
-/.env
+.env
 /music_stream/staticfiles
 /music_stream/config/db.sqlite3
 /music_stream/db.sqlite3
+/.env
