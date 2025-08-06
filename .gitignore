@@ -17,3 +17,4 @@ wheels/
 /music_stream/.coveragerc
 /music_stream/theme/static_src/node_modules
 /music_stream/db.sqlite3
+/music_stream/apps/theme/static_src/node_modules
