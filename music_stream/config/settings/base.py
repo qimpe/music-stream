@@ -22,6 +22,7 @@ INSTALLED_APPS = [
     "tailwind",
     "minio_storage",
     "django_browser_reload",
+    "apps.core",
     "apps.theme",
     "apps.oauth",
     "apps.music",
