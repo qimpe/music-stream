@@ -6,7 +6,7 @@ from .services import TrackConvertorHLS
 
 @shared_task
 def process_track(track_id: int) -> None:
-    """Обработка трека."""
+    """Обработка трека в hls пригодный формат."""
     track = Track.objects.get(id=track_id)
     track_service = TrackConvertorHLS()
     track_service.convert_track(track.pk)

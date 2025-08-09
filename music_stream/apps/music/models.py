@@ -38,8 +38,9 @@ class Music(models.Model):
 class Artist(models.Model):
     name = models.CharField(null=False, blank=False, max_length=128, unique=True, verbose_name="Имя")
     slug = models.SlugField(null=False, max_length=128, unique=True)
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name="artists")
     image = models.ImageField(upload_to="artists_images/", verbose_name="Фото")
+    # verified = models.BooleanField(default=False)
     bio = models.TextField(default="", blank=True, verbose_name="Биография")
     status = models.CharField(
         max_length=15, choices=Status.choices, null=False, default=Status.CREATED, verbose_name="Статус"
@@ -49,6 +50,7 @@ class Artist(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta(TypedModelMeta):
+        db_table = "artist"
         indexes = [
             models.Index(fields=["name"], name="idx_artist_name"),
             models.Index(fields=["slug"], name="idx_artist_slug"),
@@ -74,6 +76,7 @@ class Genre(models.Model):
     max_bpm = models.PositiveSmallIntegerField(null=True, blank=True)
 
     class Meta(TypedModelMeta):
+        db_table = "genre"
         indexes = [
             models.Index(fields=["title"], name="idx_genre_title"),
             models.Index(fields=["slug"], name="idx_genre_slug"),
@@ -95,7 +98,8 @@ class Album(Music):
         max_length=15, choices=Status.choices, null=False, default=Status.PENDING, verbose_name="Статус"
     )
 
-    class Meta(TypedModelMeta):  # type: ignore[assignment]
+    class Meta(TypedModelMeta):  # pyright: ignore[reportIncompatibleVariableOverride]
+        db_table = "album"
         indexes = [
             models.Index(fields=["title"], name="idx_album_title"),
             models.Index(fields=["slug"], name="idx_album_slug"),
@@ -113,6 +117,7 @@ class Track(Music):
     is_hls_processed = models.BooleanField(default=False)
 
     class Meta(TypedModelMeta):  # type: ignore[assignment]
+        db_table = "track"
         indexes = [
             models.Index(fields=["title"], name="idx_track_title"),
             models.Index(fields=["slug"], name="idx_track_slug"),
@@ -131,10 +136,11 @@ class Playlist(Music):
     title = models.CharField(
         null=False, blank=False, max_length=128, unique=True, verbose_name="Мне нравится", default="favorite"
     )
-    owner = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Владелец")
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Владелец", related_name="owner")
     cover = models.ImageField(upload_to="playlists_covers/", verbose_name="Обложка")
 
     class Meta(TypedModelMeta):  # type: ignore[assignment]
+        db_table = "playlist"
         unique_together = ("owner", "title")
         indexes = [
             models.Index(fields=["title"], name="idx_playlist_title"),
@@ -143,13 +149,12 @@ class Playlist(Music):
 
 
 # Связные таблица
-
-
 class AlbumArtist(models.Model):
-    artist = models.ForeignKey(Artist, on_delete=models.SET_NULL, null=True)
-    album = models.ForeignKey(Album, on_delete=models.CASCADE)
+    artist = models.ForeignKey(Artist, on_delete=models.SET_NULL, null=True, related_name="albums")
+    album = models.ForeignKey(Album, on_delete=models.CASCADE, related_name="artists")
 
     class Meta(TypedModelMeta):
+        db_table = "album_artist"
         unique_together = ("artist", "album")
 
     def __str__(self) -> str:
@@ -157,20 +162,24 @@ class AlbumArtist(models.Model):
 
 
 class TrackMetadata(models.Model):
-    track = models.OneToOneField(Track, on_delete=models.CASCADE, related_name="tracks_metadata")
+    track = models.OneToOneField(Track, on_delete=models.CASCADE, related_name="metadata")
     duration = models.PositiveSmallIntegerField()
     bitrate = models.PositiveSmallIntegerField()
     file_size = models.PositiveIntegerField()
+
+    class Meta(TypedModelMeta):
+        db_table = "track_metadata"
 
     def __str__(self) -> str:
         return f"Metadata of {self.track}"
 
 
 class TrackInPlaylist(models.Model):
-    track = models.ForeignKey(Track, on_delete=models.CASCADE)
-    playlist = models.ForeignKey(Playlist, on_delete=models.CASCADE)
+    track = models.ForeignKey(Track, on_delete=models.CASCADE, related_name="playlist_tracks")
+    playlist = models.ForeignKey(Playlist, on_delete=models.CASCADE, related_name="playlist")
 
     class Meta(TypedModelMeta):
+        db_table = "track_in_playlist"
         unique_together = ("track", "playlist")
 
     def __str__(self) -> str:
@@ -178,11 +187,12 @@ class TrackInPlaylist(models.Model):
 
 
 class TrackInAlbum(models.Model):
-    track = models.ForeignKey(Track, on_delete=models.CASCADE)
-    album = models.ForeignKey(Album, on_delete=models.CASCADE)
+    track = models.ForeignKey(Track, on_delete=models.CASCADE, related_name="track_album")
+    album = models.ForeignKey(Album, on_delete=models.CASCADE, related_name="album_tracks")
     position = models.PositiveSmallIntegerField(default=1, null=False, blank=False)
 
     class Meta(TypedModelMeta):
+        db_table = "track_in_album"
         ordering = ["position"]
         unique_together = ("track", "album")
 
@@ -191,10 +201,11 @@ class TrackInAlbum(models.Model):
 
 
 class TrackGenres(models.Model):
-    track = models.ForeignKey(Track, on_delete=models.CASCADE)
-    genre = models.ForeignKey(Genre, on_delete=models.SET_NULL, null=True)
+    track = models.ForeignKey(Track, on_delete=models.CASCADE, related_name="track_genres")
+    genre = models.ForeignKey(Genre, on_delete=models.SET_NULL, null=True, related_name="genre")
 
     class Meta(TypedModelMeta):
+        db_table = "track_genres"
         unique_together = ("track", "genre")
 
     def __str__(self) -> str:
@@ -202,10 +213,11 @@ class TrackGenres(models.Model):
 
 
 class AlbumGenres(models.Model):
-    album = models.ForeignKey(Album, on_delete=models.CASCADE)
-    genre = models.ForeignKey(Genre, on_delete=models.CASCADE)
+    album = models.ForeignKey(Album, on_delete=models.CASCADE, related_name="album_genre")
+    genre = models.ForeignKey(Genre, on_delete=models.CASCADE, related_name="genre_album")
 
     class Meta(TypedModelMeta):
+        db_table = "album_genres"
         unique_together = ("genre", "album")
 
     def __str__(self) -> str:
@@ -213,10 +225,11 @@ class AlbumGenres(models.Model):
 
 
 class PlaylistGenres(models.Model):
-    playlist = models.ForeignKey(Playlist, on_delete=models.CASCADE)
-    genre = models.ForeignKey(Genre, on_delete=models.CASCADE)
+    playlist = models.ForeignKey(Playlist, on_delete=models.CASCADE, related_name="playlist_genre")
+    genre = models.ForeignKey(Genre, on_delete=models.CASCADE, related_name="genre_playlist")
 
     class Meta(TypedModelMeta):
+        db_table = "playlist_genres"
         unique_together = ("playlist", "genre")
 
     def __str__(self) -> str:
@@ -224,8 +237,11 @@ class PlaylistGenres(models.Model):
 
 
 class ArtistTrack(models.Model):
-    artist = models.ForeignKey(Artist, on_delete=models.CASCADE)
-    track = models.ForeignKey(Track, on_delete=models.CASCADE)
+    artist = models.ForeignKey(Artist, on_delete=models.CASCADE, related_name="artist_track")
+    track = models.ForeignKey(Track, on_delete=models.CASCADE, related_name="track_artist")
+
+    class Meta(TypedModelMeta):
+        db_table = "artist_track"
 
     def __str__(self) -> str:
         return f"Artist {self.artist} has {self.track} track"

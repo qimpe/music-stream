@@ -1,9 +1,11 @@
+import logging
 import typing
 
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.db.models.query import QuerySet
+from django.forms import inlineformset_factory
 from django.http import HttpResponse
 from django.http.request import HttpRequest
 from django.http.response import HttpResponseBase, HttpResponseNotFound, HttpResponseRedirect
@@ -15,6 +17,8 @@ from . import services
 from .forms import AlbumForm, ArtistCreateForm, TrackCreateForm, TrackInAlbumFormSet
 from .mixins import UserHasArtist, UserManageArtist
 from .models import Album, Artist, Track
+
+logger = logging.getLogger(__name__)
 
 
 # * index
@@ -38,12 +42,12 @@ class ArtistCreateView(UserHasArtist, CreateView):
 
     def form_valid(self, form: ArtistCreateForm) -> HttpResponse:
         artist_service = services.ArtistService()
-        self.object = artist_service.create_artist(self.request, form)
+        self.object = artist_service.create_artist(self.request.user, form)  # pyright: ignore[reportArgumentType]
         messages.success(self.request, "Карточка успешно создана")
         return redirect(self.get_success_url())
 
     def get_success_url(self) -> str:
-        return reverse(self.success_url, kwargs={"artist_id": self.object.id})
+        return reverse(self.success_url, kwargs={"artist_id": self.object.id})  # pyright: ignore[reportOptionalMemberAccess]
 
 
 class ArtistDetailView(DetailView):
@@ -56,16 +60,15 @@ class ArtistDetailView(DetailView):
 
     def get_queryset(self) -> QuerySet[Artist]:
         artist_service = services.ArtistService()
-        artist_id = self.kwargs.get("artist_id")
-        return artist_service.fetch_artist_queryset_by_id(artist_id)
+        return artist_service.fetch_artist_queryset_by_id(self.kwargs.get("artist_id"))
 
     def get_context_data(self, **kwargs: typing.Any) -> dict[str, typing.Any]:
         artist_album_service = services.AlbumArtistService()
         artist_service = services.ArtistService()
-        artist_id = self.kwargs.get("artist_id")
         context = super().get_context_data(**kwargs)
-        context["artist_albums"] = artist_album_service.fetch_artist_albums(artist_id)
-        context["releases"] = artist_service.fetch_all_artist_releases(artist_id)
+        if artist_id := self.kwargs.get("artist_id"):
+            context["artist_albums"] = artist_album_service.fetch_artist_albums(artist_id)
+            context["releases"] = artist_service.fetch_all_artist_releases(artist_id)
         return context
 
 
@@ -90,11 +93,7 @@ class AlbumCreateView(LoginRequiredMixin, CreateView):
 
     def get_context_data(self, **kwargs: typing.Any) -> dict[str, typing.Any]:
         context = super().get_context_data(**kwargs)
-        if "track_formset" in kwargs:
-            context["track_formset"] = kwargs["track_formset"]
-        else:
-            context["track_formset"] = TrackInAlbumFormSet(prefix="tracks")
-
+        context["track_formset"] = TrackInAlbumFormSet(prefix="tracks")
         context["genres"] = services.GenreService().fetch_all_genres_titles()
         return context
 
@@ -106,22 +105,15 @@ class AlbumCreateView(LoginRequiredMixin, CreateView):
             return self.form_valid(album_form, track_formset)
         return self.form_invalid(album_form, track_formset)
 
-    def form_valid(self, form: AlbumForm, track_formset) -> HttpResponse:  # type: ignore
+    def form_valid(self, form: AlbumForm, track_formset: inlineformset_factory) -> HttpResponse:  # type: ignore
         album_service = services.AlbumService()
         self.object = album_service.create_album(self.request.user.id, form, track_formset)  # type: ignore
         messages.success(self.request, "Альбом создан и отправлен на модерацию")
         return super().form_valid(form)
 
-    def form_invalid(self, album_form: AlbumForm, track_formset) -> HttpResponse:  # type: ignore
-        return render(
-            self.request,
-            self.template_name,  # type: ignore
-            {
-                "genres": services.GenreService().fetch_all_genres_titles(),
-                "album_form": album_form,
-                "track_formset": track_formset,
-            },
-        )
+    def form_invalid(self, album_form: AlbumForm, track_formset: inlineformset_factory) -> HttpResponse:  # type: ignore
+        logger.debug(album_form.data)
+        return self.render_to_response(self.get_context_data(album_form=album_form, track_formset=track_formset))
 
     def get_success_url(self) -> str:
         return reverse("users:profile", kwargs={"user_id": self.request.user.id})

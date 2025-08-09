@@ -3,9 +3,10 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-from apps.music.models import Track
 from config.minio import MinioClient
 from django.conf import settings
+
+from apps.music.models import Track
 
 
 class TrackConvertorHLS:
