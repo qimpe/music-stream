@@ -110,4 +110,5 @@ MINIO_SECRET_KEY = "pass12345"
 
 
 # * Для tailwind
+#NPM_BIN_PATH = "C:/Program Files/nodejs/npm.cmd"
 NPM_BIN_PATH = "C:/Program Files/nodejs/npm.cmd"

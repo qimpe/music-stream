@@ -1,6 +1,6 @@
-from django.db.models import QuerySet, Sum
+from django.db.models import QuerySet
 
-from apps.music.models import Album, Track, TrackInAlbum, TrackMetadata
+from apps.music.models import Album, Track, TrackInAlbum
 
 
 class TrackInAlbumService:

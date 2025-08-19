@@ -1,9 +1,7 @@
 from itertools import chain
 
 from django.contrib.auth.models import User
-from django.db import transaction
 from django.db.models import QuerySet
-from django.http.request import HttpRequest
 
 from apps.music.forms import ArtistCreateForm
 from apps.music.models import Album, Artist, Track

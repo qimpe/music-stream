@@ -30,6 +30,14 @@ class TrackService:
                 self.artist_track_service.create_artist_track(artist.pk, track.id)
                 process_track.delay(track.id)
 
+    def bulk_create_track(self,tracks_with_positions:list[tuple[Track,int]])->list[Track]:
+        """Создает треки из объектов треков."""
+        tracks_data = [track for track, position in tracks_with_positions]
+        return Track.objects.bulk_create(tracks_data)
+
+    def process_track_for_hls_streming(self,tracks) -> None:
+        """получает список треков и обрабатывает их в формат пригодный для hls."""
+
     def create_metadata_for_tracks_list(self, tracks_list: list[Track]) -> None:
         """Создает метаданные для списка треков."""
         tracks_metadata = [
@@ -73,19 +81,20 @@ class TrackService:
             logger.warning(f"Error creating metadata for track {track.id}: {e}")
             return None
 
-    def create_track_from_formset(self, track_formset: inlineformset_factory) -> list[tuple[Track, int]]:
-        """Создает список треков с их позициями в альбоме."""
-        return [
-            (
-                Track(
-                    title=form.cleaned_data.get("track_title"),
-                    is_explicit=form.cleaned_data.get("is_explicit", False),
-                    audio_file=form.cleaned_data.get("audio_file"),
-                ),
-                form.cleaned_data["position"],
-            )
-            for form in track_formset
-        ]
+    def create_track_objs_from_formset(self, track_formset: inlineformset_factory) -> list[tuple[Track, int]]:
+        """Создает список оьъектов треков с их позициями в альбоме."""
+        with transaction.atomic():
+            return [
+                (
+                    Track(
+                        title=form.cleaned_data.get("track_title"),
+                        is_explicit=form.cleaned_data.get("is_explicit", False),
+                        audio_file=form.cleaned_data.get("audio_file"),
+                    ),
+                    form.cleaned_data["position"],
+                )
+                for form in track_formset
+            ]
 
     def update_hls_playlist_url(self, track_id: int, playlist_url: str) -> None:
         """Обновляет URL HLS-плейлиста трека."""
